@@ -44,9 +44,7 @@ do { \
 
 #define CT_EXPECT_FALSE(X) \
 do { \
-    ASSERT_ON_BUILD(!(X)) \
-    constexpr result x{!(X), #X};\
-    EXPECT_TRUE(x.didTestPass) << "gtest_ct failure: " << x.failureMsg;\
+    CT_EXPECT_TRUE(!(X)) \
 } while (0)
 
 #define CT_EXPECT_NE(X, Y) \
@@ -64,9 +62,7 @@ do { \
 
 #define CT_ASSERT_FALSE(X) \
 do { \
-    ASSERT_ON_BUILD(!(X)) \
-    constexpr result x{!(X), #X};\
-    ASSERT_TRUE(x.didTestPass) << "gtest_ct failure: " << x.failureMsg;\
+    ASSERT_ON_BUILD(!(X)) \
 } while (0)
 
 #define CT_ASSERT_EQ(X, Y) \
