@@ -1,12 +1,17 @@
 #include "gtest/gtest.h"
 
-
+//=================================================
+// C++ VERSION REQUIREMENTS
+//=================================================
 #if __cplusplus < 201103
   #error Please compile for C++11 or higher
 #elif __cplusplus < 201703
   #error Pre-C++17 is not yet supported.
 #endif
 
+//=================================================
+// CT RESULT STORAGE
+//=================================================
 struct result {
 
 #if __cplusplus < 202002
@@ -21,6 +26,9 @@ const bool didTestPass;
 const std::string_view failureMsg;
 };
 
+//=================================================
+// STOP ON COMPILE-TIME FAILURE
+//=================================================
 // Define this to fail the build when a CT failure occurs
 // #define STOP_ON_CT_FAIL
 
@@ -30,6 +38,9 @@ const std::string_view failureMsg;
 #define ASSERT_ON_BUILD(X) do { } while(0);
 #endif
 
+//=================================================
+// EXPECTS
+//=================================================
 #define CT_EXPECT_TRUE(X) \
 do { \
     ASSERT_ON_BUILD(X) \
@@ -37,14 +48,14 @@ do { \
     EXPECT_TRUE(x.didTestPass) << "gtest_ct failure: " << x.failureMsg;\
 } while (0)
 
+#define CT_EXPECT_FALSE(X) \
+do { \
+    CT_EXPECT_TRUE(!(X)); \
+} while (0)
+
 #define CT_EXPECT_EQ(X, Y) \
 do { \
     CT_EXPECT_TRUE(X == Y);\
-} while (0)
-
-#define CT_EXPECT_FALSE(X) \
-do { \
-    CT_EXPECT_TRUE(!(X)) \
 } while (0)
 
 #define CT_EXPECT_NE(X, Y) \
@@ -52,7 +63,9 @@ do { \
     CT_EXPECT_TRUE(X == Y);\
 } while (0)
 
-
+//=================================================
+// ASSERTS
+//=================================================
 #define CT_ASSERT_TRUE(X) \
 do { \
     ASSERT_ON_BUILD(X) \
@@ -62,7 +75,7 @@ do { \
 
 #define CT_ASSERT_FALSE(X) \
 do { \
-    ASSERT_ON_BUILD(!(X)) \
+    ASSERT_ON_BUILD(!(X)); \
 } while (0)
 
 #define CT_ASSERT_EQ(X, Y) \
@@ -92,6 +105,7 @@ do { \
 
 //=================================================
 // Testing usage
+// TODO Break this out into separate file and more tests
 //=================================================
 
 constexpr int foo (int x) { return x; }
