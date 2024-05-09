@@ -2,7 +2,7 @@
 #include "gtest/gtest-spi.h"
 
 //TODO add usage information
-//https://godbolt.org/z/fWzWr3qTE
+//https://godbolt.org/z/sn4d7zo6W
 
 //=================================================
 // C++ VERSION REQUIREMENTS
@@ -195,23 +195,52 @@ TEST(CT_ASSERT_TESTS, BASICS)
 //TODO WIP
 TEST(CT_EXPECT_FAILURE_TESTS, BASICS)
 {
-     EXPECT_NONFATAL_FAILURE(CT_EXPECT_TRUE(false), "fail non-fatally");
+    EXPECT_NONFATAL_FAILURE({ CT_EXPECT_TRUE(false); },"");
+    EXPECT_NONFATAL_FAILURE({ CT_EXPECT_FALSE(true); },"");
+    EXPECT_NONFATAL_FAILURE({ CT_EXPECT_EQ(1, 2); },"");
+    EXPECT_NONFATAL_FAILURE({ CT_EXPECT_NE(1, 1); },"");
+
+    constexpr TestStruct A{1, 2};
+    constexpr TestStruct B{1, 2};
+    constexpr TestStruct C{2, 2};
+
+    EXPECT_NONFATAL_FAILURE({ CT_EXPECT_NE(A, A); },"");
+    EXPECT_NONFATAL_FAILURE({ CT_EXPECT_NE(A, B); },"");
+    EXPECT_NONFATAL_FAILURE({ CT_EXPECT_EQ(A, C); },"");
+}
+
+TEST(CT_ASSERT_FAILURE_TESTS, BASICS2)
+{
+    EXPECT_FATAL_FAILURE({ CT_ASSERT_TRUE(false); },"");
+    EXPECT_FATAL_FAILURE({ CT_ASSERT_FALSE(true); },"");
+    EXPECT_FATAL_FAILURE({ CT_ASSERT_EQ(1, 2); },"");
+    EXPECT_FATAL_FAILURE({ CT_ASSERT_NE(1, 1); },"");
+    
+    constexpr TestStruct A{1, 2};
+    constexpr TestStruct B{1, 2};
+    constexpr TestStruct C{2, 2};
+
+    //TODO not working yet
+    // EXPECT_FATAL_FAILURE({ CT_ASSERT_NE(A, A); },"");
+    // EXPECT_FATAL_FAILURE({ CT_ASSERT_NE(A, B); },"");
+    // EXPECT_FATAL_FAILURE({ CT_ASSERT_EQ(A, C); },"");
 }
 
 /*
 TODO Tests to write
 NO FAIL COMPILATION ON CT FAILS
 X* basic CT expect_true/assert true passes
-* basic CT expect_true false causes fail
+X* basic CT expect_true false causes fail
 X* basic CT expect_false/assert false passes
-* basic CT expect_false true causes fail
+X* basic CT expect_false true causes fail
 
 X* basic CT expect_eq/assert_eq true equals true passes
 X* basic CT expect_eq/assert_eq false equals false passes
-* basic CT expect_eq/assert_eq true equals false fails
+X* basic CT expect_eq/assert_eq true equals false fails
 X* basic CT expect_eq/assert_eq int equals same int passes
-* basic CT expect_eq/assert_eq int equals different int fails
-X* basic CT expect_eq/assert_eq objects
+X* basic CT expect_eq/assert_eq int equals different int fails
+X* basic CT expect_eq/assert_eq objects pass
+* basic CT expect_eq/assert_eq objects fail
 
 X* inverse of last grouping with _ne
 
