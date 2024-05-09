@@ -59,13 +59,18 @@ str_const failureMsg;
 #endif
 
 //=================================================
+// ASSERTIONS COMMON
+//=================================================
+#define STREAM_FAILURE_MSG "gtest_ct failure: " << x.failureMsg.getString()
+
+//=================================================
 // EXPECTS
 //=================================================
 #define CT_EXPECT_TRUE(X) \
 do { \
     ASSERT_ON_BUILD(X) \
     constexpr result x{X, #X};\
-    EXPECT_TRUE(x.didTestPass) << "gtest_ct failure: " << x.failureMsg.getString();\
+    EXPECT_TRUE(x.didTestPass) << STREAM_FAILURE_MSG;\
 } while (0)
 
 #define CT_EXPECT_FALSE(X) \
@@ -90,7 +95,7 @@ do { \
 do { \
     ASSERT_ON_BUILD(X) \
     constexpr result x{X, #X};\
-    ASSERT_TRUE(x.didTestPass) << "gtest_ct failure: " << x.failureMsg.getString();\
+    ASSERT_TRUE(x.didTestPass) << STREAM_FAILURE_MSG;\
 } while (0)
 
 #define CT_ASSERT_FALSE(X) \

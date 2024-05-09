@@ -3,7 +3,10 @@ A compile-time (CT) wrapper for google test
 
 ## Purpose
 
-This header-only library is a simple wrapper for google test that supplies some compile-time macros for compile-time testing. The requirements of this library include:
+This header-only library is a simple wrapper for google test that supplies some compile-time macros for compile-time testing. I created this library after being inspired by [Braden Ganetsky's talk "Unit Testing an Expression Template Library in C++20"](https://schedule.cppnow.org/session/2024/unit-testing-an-expression-template-library-in-cpp20/) at C++Now 2024.
+
+
+The requirements of this library include:
 
 ### Requirements
 
@@ -29,3 +32,7 @@ Moving functionality from RT to CT has become an increasing trend in modern C++ 
 * Failing builds on CT testing failures ensures that tests are run
 * CT tests may be faster in some cases
 * Some compilers may perform different calculations at CT than at RT, and these results are difficult catch without CT testing
+
+## Future improvements
+
+* Ability to enable/disable failing a build on a CT test failure per compilation unit
