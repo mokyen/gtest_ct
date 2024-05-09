@@ -1,7 +1,8 @@
 #include "gtest/gtest.h"
+#include "gtest/gtest-spi.h"
 
 //TODO add usage information
-//https://godbolt.org/z/xhnY87rcM
+//https://godbolt.org/z/fWzWr3qTE
 
 //=================================================
 // C++ VERSION REQUIREMENTS
@@ -85,7 +86,7 @@ do { \
 
 #define CT_EXPECT_NE(X, Y) \
 do { \
-    CT_EXPECT_TRUE(X == Y);\
+    CT_EXPECT_FALSE(X == Y);\
 } while (0)
 
 //=================================================
@@ -100,7 +101,7 @@ do { \
 
 #define CT_ASSERT_FALSE(X) \
 do { \
-    ASSERT_ON_BUILD(!(X)); \
+    CT_ASSERT_TRUE(!(X)); \
 } while (0)
 
 #define CT_ASSERT_EQ(X, Y) \
@@ -135,52 +136,84 @@ do { \
 
 constexpr int foo (int x) { return x; }
 
-// constexpr str_const bar () {
-//     constexpr str_const test("Hi Mom!");
-//     static_assert(test.size() == 7);
-//     static_assert(test[6] == '!');
-//     return test;
-// }
-
-
-TEST(setup_test_case, testWillPass)
+class TestStruct
 {
-    constexpr  auto a{foo (5)};
-    CT_EXPECT_TRUE(a == 5);
-    CT_EXPECT_TRUE(a != 6);
-    CT_EXPECT_EQ(a, 5);
+public:
+    constexpr TestStruct(int c, int d) : a{c}, b{d}
+    {}
+    constexpr bool operator==(const TestStruct& rhs) const { return (this->a == rhs.a) && (this->b == rhs.b); }
 
-    // CT_ASSERT_FALSE(a == 5);
-    CT_ASSERT_NE(a, 7);
+private:
+    int a, b;
+};
 
-    const int a1{7};
-    // CT_ASSERT_EQ(4, 42);
-    CT_EXPECT_FALSE(4 == 4);
+TEST(CT_EXPECT_TESTS, BASICS)
+{
+    constexpr bool t{true};
+    CT_EXPECT_TRUE(t);
+    constexpr bool f{false};
+    CT_EXPECT_FALSE(f);
 
-    int* a2;
-    EXPECT_EQ(*a2, 7);
+    CT_EXPECT_EQ(true, true);
+    CT_EXPECT_NE(true, false);
 
-    // constexpr auto a3{bar()};
-    constexpr str_const a3{"Hi Mom!"};
-    EXPECT_STREQ("ABC", a3.getString()) << a3.getString();
+    CT_EXPECT_EQ(1, 1);
+    CT_EXPECT_NE(1, 2);
+
+    constexpr TestStruct A{1, 2};
+    constexpr TestStruct B{1, 2};
+    constexpr TestStruct C{2, 2};
+
+    CT_EXPECT_EQ(A, A);
+    CT_EXPECT_EQ(A, B);
+    CT_EXPECT_NE(A, C);
+}
+
+TEST(CT_ASSERT_TESTS, BASICS)
+{
+    constexpr bool t{true};
+    CT_ASSERT_TRUE(t);
+    constexpr bool f{false};
+    CT_ASSERT_FALSE(f);
+
+    CT_ASSERT_EQ(true, true);
+    CT_ASSERT_NE(true, false);
+
+    CT_ASSERT_EQ(1, 1);
+    CT_ASSERT_NE(1, 2);
+
+    constexpr TestStruct A{1, 2};
+    constexpr TestStruct B{1, 2};
+    constexpr TestStruct C{2, 2};
+
+    CT_ASSERT_EQ(A, A);
+    CT_ASSERT_EQ(A, B);
+    CT_ASSERT_NE(A, C);
+}
+
+
+//TODO WIP
+TEST(CT_EXPECT_FAILURE_TESTS, BASICS)
+{
+     EXPECT_NONFATAL_FAILURE(CT_EXPECT_TRUE(false), "fail non-fatally");
 }
 
 /*
 TODO Tests to write
 NO FAIL COMPILATION ON CT FAILS
-* basic CT expect_true/assert true passes
+X* basic CT expect_true/assert true passes
 * basic CT expect_true false causes fail
-* basic CT expect_false/assert false passes
+X* basic CT expect_false/assert false passes
 * basic CT expect_false true causes fail
 
-* basic CT expect_eq/assert_eq true equals true passes
-* basic CT expect_eq/assert_eq false equals false passes
+X* basic CT expect_eq/assert_eq true equals true passes
+X* basic CT expect_eq/assert_eq false equals false passes
 * basic CT expect_eq/assert_eq true equals false fails
-* basic CT expect_eq/assert_eq int equals same int passes
+X* basic CT expect_eq/assert_eq int equals same int passes
 * basic CT expect_eq/assert_eq int equals different int fails
-* basic CT expect_eq/assert_eq objects
+X* basic CT expect_eq/assert_eq objects
 
-* inverse of last grouping with _ne
+X* inverse of last grouping with _ne
 
 * assert test(s) showing that results stop after assert fail
 * expect test(s) showing that results continue after test fail
