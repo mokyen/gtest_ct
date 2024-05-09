@@ -159,3 +159,32 @@ TEST(setup_test_case, testWillPass)
     constexpr str_const a3{"Hi Mom!"};
     EXPECT_STREQ("ABC", a3.getString()) << a3.getString();
 }
+
+/*
+TODO Tests to write
+NO FAIL COMPILATION ON CT FAILS
+* basic CT expect_true/assert true passes
+* basic CT expect_true false causes fail
+* basic CT expect_false/assert false passes
+* basic CT expect_false true causes fail
+
+* basic CT expect_eq/assert_eq true equals true passes
+* basic CT expect_eq/assert_eq false equals false passes
+* basic CT expect_eq/assert_eq true equals false fails
+* basic CT expect_eq/assert_eq int equals same int passes
+* basic CT expect_eq/assert_eq int equals different int fails
+* basic CT expect_eq/assert_eq objects
+
+* inverse of last grouping with _ne
+
+* assert test(s) showing that results stop after assert fail
+* expect test(s) showing that results continue after test fail
+
+* test(s) showing interweaving CT and RT tests
+
+
+FAIL COMPILATION ON CT FAILS
+* show that expect/assert tests fail compilation
+
+
+*/
