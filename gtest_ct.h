@@ -1,8 +1,9 @@
 #include "gtest/gtest.h"
 #include "gtest/gtest-spi.h"
+#include <algorithm>
 
 //TODO add usage information
-//https://godbolt.org/z/sn4d7zo6W
+//https://godbolt.org/z/xhnY87rcM
 
 //=================================================
 // C++ VERSION REQUIREMENTS
@@ -192,7 +193,6 @@ TEST(CT_ASSERT_TESTS, BASICS)
 }
 
 
-//TODO WIP
 TEST(CT_EXPECT_FAILURE_TESTS, BASICS)
 {
     EXPECT_NONFATAL_FAILURE({ CT_EXPECT_TRUE(false); },"");
@@ -209,6 +209,7 @@ TEST(CT_EXPECT_FAILURE_TESTS, BASICS)
     EXPECT_NONFATAL_FAILURE({ CT_EXPECT_EQ(A, C); },"");
 }
 
+//TODO WIP
 TEST(CT_ASSERT_FAILURE_TESTS, BASICS2)
 {
     EXPECT_FATAL_FAILURE({ CT_ASSERT_TRUE(false); },"");
@@ -226,6 +227,35 @@ TEST(CT_ASSERT_FAILURE_TESTS, BASICS2)
     // EXPECT_FATAL_FAILURE({ CT_ASSERT_EQ(A, C); },"");
 }
 
+TEST(CT_EXPECT_TESTS, CT_EXPECT_CONTINUES)
+{
+    CT_EXPECT_TRUE(true);
+    //This would fail if we didn't continue after the previous test
+    EXPECT_NONFATAL_FAILURE({ CT_EXPECT_TRUE(false); },"");
+}
+
+TEST(CT_EXPECT_TESTS, COMBINED_CT_RT_EXPECT)
+{
+    CT_EXPECT_TRUE(true);
+    //This would fail if we didn't continue after the previous test
+    EXPECT_NONFATAL_FAILURE({ EXPECT_TRUE(false); },"");
+}
+
+TEST(CT_ASSERT_TESTS, CT_ASSERT_DOESNT_CONTINUE)
+{
+    EXPECT_FATAL_FAILURE({ CT_ASSERT_TRUE(false); },"");
+    //This would fail if we continued after the previous test
+    //TODO this isn't working as expected
+    EXPECT_TRUE(false) << "This shouldn't be evaluated";
+}
+
+TEST(CT_ASSERT_TESTS, COMBINED_CT_RT_EXPECT)
+{
+    CT_ASSERT_TRUE(true);
+    //This would fail if we didn't continue after the previous test
+    EXPECT_NONFATAL_FAILURE({ EXPECT_TRUE(false); },"");
+}
+
 /*
 TODO Tests to write
 NO FAIL COMPILATION ON CT FAILS
@@ -239,15 +269,15 @@ X* basic CT expect_eq/assert_eq false equals false passes
 X* basic CT expect_eq/assert_eq true equals false fails
 X* basic CT expect_eq/assert_eq int equals same int passes
 X* basic CT expect_eq/assert_eq int equals different int fails
-X* basic CT expect_eq/assert_eq objects pass
-* basic CT expect_eq/assert_eq objects fail
+X* basic CT expect_eq/assert_eq objects
 
 X* inverse of last grouping with _ne
 
 * assert test(s) showing that results stop after assert fail
-* expect test(s) showing that results continue after test fail
+X* expect test(s) showing that results continue after test fail
 
-* test(s) showing interweaving CT and RT tests
+X* test(s) showing interweaving CT and RT tests EXPECT
+* test(s) showing interweaving CT and RT tests Assert
 
 
 FAIL COMPILATION ON CT FAILS
