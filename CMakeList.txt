@@ -1,0 +1,24 @@
+cmake_minimum_required(VERSION 3.13)
+
+project(gtest_ct)
+set(GTEST_CT_VERSION 1.0.0)
+
+option(gtest_ct_build_tests "Build gtest_ct's self tests." OFF)
+
+add_subdirectory(include)
+
+if (gtest_ct_build_tests)
+    add_subdirectory(test)
+endif()
+
+
+# USAGE
+#In the target that uses the library:
+
+#target_link_libraries(dependee
+#    PUBLIC/INTERFACE/PRIVATE # pick one
+#    project)
+
+
+#and include the header like this:
+# #include <project/folder1/file.hpp>
