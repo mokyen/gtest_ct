@@ -13,4 +13,4 @@ TBD
 
 ## Reporting a Vulnerability
 
-To report any vulerabilities, please either report an issue in this github or send me an email. Attempts will be made to address issues in each release.
+To report any vulerabilities, please either report an issue in [this github](https://github.com/mokyen/gtest_ct/issues/new) or send me an email . Attempts will be made to address issues in each release.
