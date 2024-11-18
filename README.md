@@ -4,7 +4,7 @@ A compile-time (CT) wrapper for google test
 
 ## Purpose
 
-This header-only library is a simple wrapper for google test that supplies some compile-time macros for compile-time testing. I created this library after being inspired by [Braden Ganetsky's talk "Unit Testing an Expression Template Library in C++20"](https://schedule.cppnow.org/session/2024/unit-testing-an-expression-template-library-in-cpp20/) at C++Now 2024.
+This header-only library is a simple wrapper for google test that supplies some compile-time macros for compile-time testing. I created this library after being inspired by [Braden Ganetsky's talk "Unit Testing an Expression Template Library in C++20"](https://youtu.be/H4KzM-wDiQw?si=jrv5_O0MicUxFXYe) at C++Now 2024.
 
 ### Example of usage:
 
