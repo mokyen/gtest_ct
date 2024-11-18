@@ -17,7 +17,7 @@ jobs:
     - name: Debug directory contents
       run: |
         pwd
-        ls -la
+        find .
         
     - name: Set up CMake
       uses: lukka/get-cmake@latest
