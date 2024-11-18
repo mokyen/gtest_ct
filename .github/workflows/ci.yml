@@ -1,5 +1,4 @@
 name: CI
-
 on:
   push:
     branches:
@@ -7,35 +6,40 @@ on:
   pull_request:
     branches:
       - '*'  # Trigger on pull requests to any branch
-
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
-
+    
+    # Add debugging steps
+    - name: Debug directory contents
+      run: |
+        pwd
+        ls -la
+        
     - name: Set up CMake
       uses: lukka/get-cmake@latest
       with:
         cmake-version: '3.17.1'
-
+        
     - name: Install dependencies
       run: sudo apt-get install -y g++ libgtest-dev
-
+      
     - name: Build GoogleTest
       run: |
         cd /usr/src/googletest
         sudo cmake .
         sudo make
         sudo cp lib/*.a /usr/lib
-
+        
     - name: Configure CMake
+      working-directory: ${{ github.workspace }}
       run: cmake -S . -B build -Dgtest_ct_build_tests=ON
-
+      
     - name: Build
       run: cmake --build build
-
+      
     - name: Run Tests
       run: ctest --test-dir build
