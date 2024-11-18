@@ -242,31 +242,3 @@ TEST(CT_ASSERT_FAILURE_TESTS, BASICS2)
     // EXPECT_FATAL_FAILURE({ CT_ASSERT_NE(A, B); }, "");
     // EXPECT_FATAL_FAILURE({ CT_ASSERT_EQ(A, C); }, "");
 }
-
-//=================================================
-// TODO Section
-//=================================================
-
-/*
-TODO Tests to write
-
-NO FAIL COMPILATION ON CT FAILS
-* basic CT expect_true/assert true passes
-* basic CT expect_true false causes fail
-* basic CT expect_false/assert false passes
-* basic CT expect_false true causes fail
-
-* basic CT expect_eq/assert_eq true equals true passes
-* basic CT expect_eq/assert_eq false equals false passes
-* basic CT expect_eq/assert_eq true equals false fails
-* basic CT expect_eq/assert_eq int equals same int passes
-* basic CT expect_eq/assert_eq int equals different int fails
-* basic CT expect_eq/assert_eq objects
-
-* inverse of last grouping with _ne
-
-* assert test(s) showing that results stop after assert fail
-* expect test(s) showing that results continue after test fail
-
-* test(s) showing interweaving CT and RT tests EXPECT
-* test(s) showing interweaving CT and RT tests
