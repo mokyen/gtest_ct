@@ -76,11 +76,19 @@ constexpr bool almost_equal(T x, T y, int ulp = 4) {
 }
 
 //=================================================
+// Utility Function: Char to lowercase
+//=================================================
+// Add a helper, because std::tolower is not constexpr
+constexpr char char_to_lower(char c) {
+    return (c >= 'A' && c <= 'Z') ? static_cast<char>(c + ('a' - 'A')) : c;
+}
+
+//=================================================
 // Utility Function: Case-Insensitive String Comparison
 //=================================================
 constexpr bool strcase_equal(const char* str1, const char* str2) {
     while (*str1 && *str2) {
-        if (std::tolower(*str1) != std::tolower(*str2)) {
+        if (char_to_lower(*str1) != char_to_lower(*str2)) {
             return false;
         }
         ++str1;
