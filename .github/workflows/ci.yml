@@ -2,10 +2,10 @@ name: CI
 on:
   push:
     branches:
-      - '*'  # Trigger on any branch
+      - '*'
   pull_request:
     branches:
-      - '*'  # Trigger on pull requests to any branch
+      - '*'
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -19,15 +19,18 @@ jobs:
         cmake-version: '3.17.1'
         
     - name: Install dependencies
-      run: sudo apt-get install -y g++ libgtest-dev libgmock-dev
-      
-    - name: Build GoogleTest and GoogleMock
       run: |
-        cd /usr/src/googletest
-        sudo cmake .
-        sudo cmake --build .
-        sudo cp lib/libgtest*.a /usr/lib/
-        sudo cp lib/libgmock*.a /usr/lib/
+        sudo apt-get update
+        sudo apt-get install -y g++
+        
+    - name: Build and Install GoogleTest
+      run: |
+        git clone https://github.com/google/googletest.git -b release-1.12.1
+        cd googletest
+        cmake -Bbuild -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+        cmake --build build --config Release
+        sudo cmake --build build --target install
+        cd ..
         
     - name: Configure CMake
       working-directory: ${{ github.workspace }}
@@ -37,4 +40,4 @@ jobs:
       run: cmake --build build
       
     - name: Run Tests
-      run: ctest --test-dir build
+      run: ctest --test-dir build --output-on-failure
