@@ -13,26 +13,21 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
     
-    # Add debugging steps
-    - name: Debug directory contents
-      run: |
-        pwd
-        find .
-        
     - name: Set up CMake
       uses: lukka/get-cmake@latest
       with:
         cmake-version: '3.17.1'
         
     - name: Install dependencies
-      run: sudo apt-get install -y g++ libgtest-dev
+      run: sudo apt-get install -y g++ libgtest-dev libgmock-dev
       
-    - name: Build GoogleTest
+    - name: Build GoogleTest and GoogleMock
       run: |
         cd /usr/src/googletest
         sudo cmake .
-        sudo make
-        sudo cp lib/*.a /usr/lib
+        sudo cmake --build .
+        sudo cp lib/libgtest*.a /usr/lib/
+        sudo cp lib/libgmock*.a /usr/lib/
         
     - name: Configure CMake
       working-directory: ${{ github.workspace }}
