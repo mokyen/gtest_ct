@@ -3,10 +3,10 @@ name: CTest Complex Matrix Build
 on:
   push:
     branches:
-      - '*'       # Trigger on pushes to any branch
+      - '*'      
   pull_request:
     branches:
-      - '*'       # Trigger on PRs targeting any branch
+      - '*'
 
 jobs:
   build:
@@ -15,11 +15,13 @@ jobs:
     strategy:
       matrix:
         cpp_standard: [11, 14, 17, 20, 23]
-        gtest_ref: []
 
         include:
+          # C++11 builds will use Google Test 1.12.1
           - cpp_standard: 11
             gtest_ref: release-1.12.1
+
+          # C++14, 17, 20, 23 builds will use Google Test 1.14.0
           - cpp_standard: 14
             gtest_ref: release-1.14.0
           - cpp_standard: 17
@@ -38,7 +40,6 @@ jobs:
 
       - name: Build Google Test (for C++ ${{ matrix.cpp_standard }})
         run: |
-          # Build GT 1.12.1 with C++17 for compatibility if needed
           GT_BUILD_CXX_STANDARD="${{ matrix.cpp_standard }}"
           if [ "${{ matrix.gtest_ref }}" = "release-1.12.1" ]; then
             GT_BUILD_CXX_STANDARD="17"
@@ -49,7 +50,9 @@ jobs:
 
       - name: Configure and Build Project (with C++ ${{ matrix.cpp_standard }})
         run: |
-          cmake -S . -B build -DCMAKE_CXX_STANDARD=${{ matrix.cpp_standard }} -DCMAKE_RUNTIME_OUTPUT_DIRECTORY=bin
+          cmake -S . -B build \
+                -DCMAKE_CXX_STANDARD=${{ matrix.cpp_standard }} \
+                -DCMAKE_RUNTIME_OUTPUT_DIRECTORY=bin
           cmake --build build
 
       - name: Run Tests (for C++ ${{ matrix.cpp_standard }})
