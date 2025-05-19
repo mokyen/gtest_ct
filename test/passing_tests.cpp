@@ -121,66 +121,11 @@ TEST(CT_ASSERT_TESTS, RELATIONAL_OPERATORS) {
 
 TEST(CT_ASSERT_TESTS, FLOATING_POINT_COMPARISONS) {
   constexpr float f1 = 0.1f;
-  // constexpr float f2 = f1 + std::numeric_limits<float>::epsilon();
-  constexpr float epsilon = std::numeric_limits<float>::epsilon();
-constexpr float f2 = f1 + epsilon;
-
-// Add these static_asserts and see which one fails compilation with Clang
-static_assert(f2 > f1, "f2 should be greater than f1"); // Basic check
-static_assert(f2 - f1 == epsilon, "f2 - f1 should equal epsilon"); // Crucial check
-static_assert(std::abs(f1 - f2) == epsilon, "abs(f1 - f2) should equal epsilon"); // Check abs
-static_assert(std::abs(f1 + f2) > 0.0f, "abs(f1+f2) should be positive"); // Check the other term
-static_assert(std::numeric_limits<float>::epsilon() > 0.0f, "epsilon should be positive"); // Check epsilon value itself
-
-// Then check parts of the almost_equal calculation
-// static_assert(std::abs(f1 - f2) <= std::numeric_limits<float>::epsilon() * std::abs(f1 + f2) * 1024); // This is the original check, should fail
-// static_assert(std::numeric_limits<float>::epsilon() <= std::numeric_limits<float>::epsilon() * std::abs(f1 + f2) * 1024); // Simplified check, should fail
+  constexpr float f2 = f1 + std::numeric_limits<float>::epsilon();
 
   CT_ASSERT_FLOAT_EQ(f1, f2);
   CT_ASSERT_DOUBLE_EQ(static_cast<double>(f1), static_cast<double>(f2));
   CT_ASSERT_NEAR(1.0, 1.001, 0.01);
-}
-
-// Define f1, f2, almost_equal as in your gtest_ct.h and passing_tests.cpp
-constexpr float f1 = 0.1f;
-constexpr float f2 = f1 + std::numeric_limits<float>::epsilon();
-constexpr int test_ulp = 1024;
-
-// This line mimics the problematic part of the macro
-constexpr result test_res{almost_equal<float>(f1, f2, test_ulp), "almost_equal<float>(f1, f2, 1024)"};
-
-TEST(FloatingPointDebug, IsolatedConstexprResult) {
-  // Check the result of the compile-time evaluation
-  EXPECT_TRUE(test_res.didTestPass); // This is what's failing in your original tests
-}
-
-TEST(FloatingPointDebug, IsolatedConstexprResultInTest) {
-  constexpr float f1 = 0.1f;
-  constexpr float f2 = f1 + std::numeric_limits<float>::epsilon();
-  constexpr int test_ulp = 1024;
-
-  // Direct initialization of constexpr result within a TEST macro
-  constexpr result test_res{almost_equal<float>(f1, f2, test_ulp), "almost_equal<float>(f1, f2, 1024)"};
-
-  // Check the result using standard Google Test EXPECT
-  EXPECT_TRUE(test_res.didTestPass);
-  if (!test_res.didTestPass) {
-      // You can print the failure message here if needed, though EXPECT_TRUE does it
-      // std::cerr << "Failure: " << test_res.failureMsg.getString() << std::endl;
-  }
-}
-
-TEST(FloatingPointDebug, ConstexprResultAndExpectDirect) {
-  constexpr float f1 = 0.1f;
-  constexpr float f2 = f1 + std::numeric_limits<float>::epsilon();
-  constexpr int test_ulp = 1024;
-  constexpr bool condition = almost_equal<float>(f1, f2, test_ulp); // Evaluate the condition separately
-
-  // Mimic the problematic part of the macro, but without the do/while(0)
-  constexpr result x{condition, "almost_equal<float>(f1, f2, 1024)"};
-
-  // The runtime assertion part of the macro
-  EXPECT_TRUE(x.didTestPass) << STREAM_FAILURE_MSG;
 }
 
 TEST(CT_ASSERT_TESTS, C_STRING_COMPARISONS) {
