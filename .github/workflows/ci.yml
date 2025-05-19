@@ -3,21 +3,21 @@ name: CTest Complex Matrix Build
 on:
   push:
     branches:
-      - main
+      - '*'       # Trigger on pushes to any branch
   pull_request:
     branches:
-      - main
+      - '*'       # Trigger on PRs targeting any branch
 
 jobs:
   build:
-    runs-on: ubuntu-latest # Or your preferred runner environment
+    runs-on: ubuntu-latest
 
     strategy:
       matrix:
         # Define the C++ standards you want to test
         cpp_standard: [11, 14, 17, 20, 23]
         # This variable will be populated by the 'include' block below
-        gtest_ref: [] 
+        gtest_ref: []
 
         include:
           # C++11 builds will use Google Test 1.12.1
@@ -25,7 +25,6 @@ jobs:
             gtest_ref: release-1.12.1
 
           # C++14, 17, 20, 23 builds will use Google Test 1.14.0
-          # This version requires C++14+ and is compatible with C++17/20/23 compilers.
           - cpp_standard: 14
             gtest_ref: release-1.14.0
           - cpp_standard: 17
@@ -34,16 +33,9 @@ jobs:
             gtest_ref: release-1.14.0
           - cpp_standard: 23
             gtest_ref: release-1.14.0
-          # If you truly want the absolute latest for C++17/20/23 (less stable):
-          # - cpp_standard: 17
-          #   gtest_ref: main
-          # - cpp_standard: 20
-          #   gtest_ref: main
-          # - cpp_standard: 23
-          #   gtest_ref: main
 
     steps:
-      - uses: actions/checkout@v4 # Checks out your repository code
+      - uses: actions/checkout@v4
 
       - name: Clone Google Test ${{ matrix.gtest_ref }}
         run: git clone https://github.com/google/googletest.git -b ${{ matrix.gtest_ref }} googletest
@@ -70,3 +62,4 @@ jobs:
 
       - name: Run Tests (for C++ ${{ matrix.cpp_standard }})
         run: ./bin/passing_tests
+        
