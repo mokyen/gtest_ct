@@ -44,7 +44,7 @@ jobs:
     - name: Set up CMake
       uses: lukka/get-cmake@latest
       with:
-        cmake-version: '3.17.1' # Or a later version if needed
+        cmakeVersion: '3.17.1' # Or a later version if needed
 
     - name: Install dependencies
       run: |
