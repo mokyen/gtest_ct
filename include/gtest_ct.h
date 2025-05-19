@@ -32,13 +32,9 @@ class str_const {  // constexpr string
 
 // constexpr implementation of strcmp for C++11/14/17
 constexpr int constexpr_strcmp(const char* s1, const char* s2) {
-    while (*s1 != '\0' && *s1 == *s2) {
-        s1++;
-        s2++;
-    }
-    // The difference between the characters at the point of divergence
-    // or the null terminator if strings are equal up to that point.
-    return static_cast<unsigned char>(*s1) - static_cast<unsigned char>(*s2);
+    return (*s1 == *s2)
+        ? ((*s1 == '\0') ? 0 : constexpr_strcmp(s1 + 1, s2 + 1))
+        : ((*s1 < *s2) ? -1 : 1);
 }
 
 // CT RESULT STORAGE
