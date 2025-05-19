@@ -30,6 +30,17 @@ class str_const {  // constexpr string
   constexpr const char* const getString() const { return p_; }
 };
 
+// constexpr implementation of strcmp for C++11/14/17
+constexpr int constexpr_strcmp(const char* s1, const char* s2) {
+    while (*s1 != '\0' && *s1 == *s2) {
+        s1++;
+        s2++;
+    }
+    // The difference between the characters at the point of divergence
+    // or the null terminator if strings are equal up to that point.
+    return static_cast<unsigned char>(*s1) - static_cast<unsigned char>(*s2);
+}
+
 // CT RESULT STORAGE
 struct result {
 #if __cplusplus < 202002
@@ -131,12 +142,12 @@ constexpr bool strcase_equal(const char* str1, const char* str2) {
 
 #define CT_EXPECT_STREQ(X, Y)                   \
   do {                                          \
-    CT_EXPECT_TRUE(std::strcmp(X, Y) == 0);     \
+    CT_EXPECT_TRUE(constexpr_strcmp(X, Y) == 0);     \
   } while (0)
 
 #define CT_EXPECT_STRNE(X, Y)                   \
   do {                                          \
-    CT_EXPECT_FALSE(std::strcmp(X, Y) == 0);    \
+    CT_EXPECT_FALSE(constexpr_strcmp(X, Y) == 0);    \
   } while (0)
 
 #define CT_EXPECT_STRCASEEQ(X, Y)           \
@@ -209,12 +220,12 @@ constexpr bool strcase_equal(const char* str1, const char* str2) {
 
 #define CT_ASSERT_STREQ(X, Y)                   \
   do {                                          \
-    CT_ASSERT_TRUE(std::strcmp(X, Y) == 0);     \
+    CT_ASSERT_TRUE(constexpr_strcmp(X, Y) == 0);     \
   } while (0)
 
 #define CT_ASSERT_STRNE(X, Y)                   \
   do {                                          \
-    CT_ASSERT_FALSE(std::strcmp(X, Y) == 0);    \
+    CT_ASSERT_FALSE(constexpr_strcmp(X, Y) == 0);    \
   } while (0)
 
 #define CT_ASSERT_STRCASEEQ(X, Y)           \
