@@ -38,7 +38,7 @@ jobs:
         run: |
           git clone https://github.com/google/googletest.git -b ${{ matrix.gtest_ref }} googletest
 
-      - name: Build GoogleTest (for C++ ${{ matrix.cpp_standard }})
+      - name: Build and Install GoogleTest (for C++ ${{ matrix.cpp_standard }})
         run: |
           # If we’re on the C++11 row, force build with C++17:
           GT_BUILD_CXX_STANDARD="${{ matrix.cpp_standard }}"
@@ -46,10 +46,15 @@ jobs:
             GT_BUILD_CXX_STANDARD="17"
           fi
 
+          # 1) Configure & build GTest
           cmake -S googletest \
                 -B googletest/build \
                 -DCMAKE_CXX_STANDARD="$GT_BUILD_CXX_STANDARD"
+
           cmake --build googletest/build
+
+          # 2) Install GTest into /usr/local so find_package(GTest) will work
+          cmake --install googletest/build --prefix /usr/local
 
       - name: Configure and Build Project (with C++ ${{ matrix.cpp_standard }})
         run: |
