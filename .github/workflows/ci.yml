@@ -17,11 +17,11 @@ jobs:
         cpp_standard: [11, 14, 17, 20, 23]
 
         include:
-          # C++11 builds → GoogleTest v1.12.1
+          # C++11 → GoogleTest release-1.12.1 (last C++11-compatible)
           - cpp_standard: 11
-            gtest_ref: v1.12.1
+            gtest_ref: release-1.12.1
 
-          # C++14, 17, 20, 23 builds → GoogleTest v1.14.0
+          # C++14, 17, 20, 23 → GoogleTest v1.14.0 (first stable C++14+)
           - cpp_standard: 14
             gtest_ref: v1.14.0
           - cpp_standard: 17
@@ -34,19 +34,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Clone Google Test (${{ matrix.gtest_ref }})
+      - name: Clone GoogleTest (${{ matrix.gtest_ref }})
         run: |
           git clone https://github.com/google/googletest.git -b ${{ matrix.gtest_ref }} googletest
 
-      - name: Build Google Test (for C++ ${{ matrix.cpp_standard }})
+      - name: Build GoogleTest (for C++ ${{ matrix.cpp_standard }})
         run: |
-          # Build GT 1.12.1 with C++17 for compatibility if needed
+          # If we’re on the C++11 row, force build with C++17:
           GT_BUILD_CXX_STANDARD="${{ matrix.cpp_standard }}"
-          if [ "${{ matrix.gtest_ref }}" = "v1.12.1" ]; then
+          if [ "${{ matrix.gtest_ref }}" = "release-1.12.1" ]; then
             GT_BUILD_CXX_STANDARD="17"
           fi
 
-          cmake -S googletest -B googletest/build -DCMAKE_CXX_STANDARD=$GT_BUILD_CXX_STANDARD
+          cmake -S googletest \
+                -B googletest/build \
+                -DCMAKE_CXX_STANDARD="$GT_BUILD_CXX_STANDARD"
           cmake --build googletest/build
 
       - name: Configure and Build Project (with C++ ${{ matrix.cpp_standard }})
