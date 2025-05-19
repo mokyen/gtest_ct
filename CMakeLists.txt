@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.13)
 project(gtest_ct VERSION 1.0.0)
 
 # Option to build tests, default is OFF
-option(gtest_ct_build_tests "Build gtest_ct's self-tests." OFF)
+option(gtest_ct_build_tests "Build gtest_ct's self-tests." ON)
 
 # Make sure to include the directory with your headers
 add_library(gtest_ct INTERFACE)

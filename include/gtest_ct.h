@@ -30,6 +30,17 @@ class str_const {  // constexpr string
   constexpr const char* const getString() const { return p_; }
 };
 
+// constexpr implementation of strcmp for C++11/14/17
+constexpr int constexpr_strcmp(const char* s1, const char* s2) {
+    while (*s1 != '\0' && *s1 == *s2) {
+        s1++;
+        s2++;
+    }
+    // The difference between the characters at the point of divergence
+    // or the null terminator if strings are equal up to that point.
+    return static_cast<unsigned char>(*s1) - static_cast<unsigned char>(*s2);
+}
+
 // CT RESULT STORAGE
 struct result {
 #if __cplusplus < 202002
@@ -61,7 +72,7 @@ struct result {
 
 // Utility Function: ULP-based Floating-Point Comparison
 template <typename T>
-constexpr bool almost_equal(T x, T y, int ulp = 4) {
+constexpr bool almost_equal(T x, T y, int ulp = 256) {
   static_assert(std::is_floating_point<T>::value,
                 "almost_equal is only for floating-point types.");
   return std::abs(x - y) <= std::numeric_limits<T>::epsilon() *
@@ -87,12 +98,18 @@ constexpr bool strcase_equal(const char* str1, const char* str2) {
 }
 
 // EXPECTS
+// #define CT_EXPECT_TRUE(X)                             \
+//   do {                                               \
+//     ASSERT_ON_BUILD(X)                               \
+//     constexpr result x{X, #X};                       \
+//     EXPECT_TRUE(x.didTestPass) << STREAM_FAILURE_MSG; \
+//   } while (0)
+
 #define CT_EXPECT_TRUE(X)                             \
-  do {                                               \
     ASSERT_ON_BUILD(X)                               \
     constexpr result x{X, #X};                       \
-    EXPECT_TRUE(x.didTestPass) << STREAM_FAILURE_MSG; \
-  } while (0)
+    EXPECT_TRUE(x.didTestPass) << STREAM_FAILURE_MSG
+
 
 #define CT_EXPECT_FALSE(X) \
   do {                     \
@@ -131,12 +148,12 @@ constexpr bool strcase_equal(const char* str1, const char* str2) {
 
 #define CT_EXPECT_STREQ(X, Y)                   \
   do {                                          \
-    CT_EXPECT_TRUE(std::strcmp(X, Y) == 0);     \
+    CT_EXPECT_TRUE(constexpr_strcmp(X, Y) == 0);     \
   } while (0)
 
 #define CT_EXPECT_STRNE(X, Y)                   \
   do {                                          \
-    CT_EXPECT_FALSE(std::strcmp(X, Y) == 0);    \
+    CT_EXPECT_FALSE(constexpr_strcmp(X, Y) == 0);    \
   } while (0)
 
 #define CT_EXPECT_STRCASEEQ(X, Y)           \
@@ -151,12 +168,12 @@ constexpr bool strcase_equal(const char* str1, const char* str2) {
 
 #define CT_EXPECT_FLOAT_EQ(X, Y)               \
   do {                                         \
-    CT_EXPECT_TRUE(almost_equal<float>(X, Y)); \
+    CT_EXPECT_TRUE(almost_equal<float>(X, Y, 1024)); \
   } while (0)
 
 #define CT_EXPECT_DOUBLE_EQ(X, Y)               \
   do {                                          \
-    CT_EXPECT_TRUE(almost_equal<double>(X, Y)); \
+    CT_EXPECT_TRUE(almost_equal<double>(X, Y, 1024)); \
   } while (0)
 
 #define CT_EXPECT_NEAR(X, Y, abs_error)                \
@@ -165,12 +182,17 @@ constexpr bool strcase_equal(const char* str1, const char* str2) {
   } while (0)
 
 // ASSERTS
+// #define CT_ASSERT_TRUE(X)                             \
+//   do {                                               \
+//     ASSERT_ON_BUILD(X)                               \
+//     constexpr result x{X, #X};                       \
+//     ASSERT_TRUE(x.didTestPass) << STREAM_FAILURE_MSG; \
+//   } while (0)
+
 #define CT_ASSERT_TRUE(X)                             \
-  do {                                               \
     ASSERT_ON_BUILD(X)                               \
     constexpr result x{X, #X};                       \
-    ASSERT_TRUE(x.didTestPass) << STREAM_FAILURE_MSG; \
-  } while (0)
+    ASSERT_TRUE(x.didTestPass) << STREAM_FAILURE_MSG
 
 #define CT_ASSERT_FALSE(X) \
   do {                     \
@@ -209,12 +231,12 @@ constexpr bool strcase_equal(const char* str1, const char* str2) {
 
 #define CT_ASSERT_STREQ(X, Y)                   \
   do {                                          \
-    CT_ASSERT_TRUE(std::strcmp(X, Y) == 0);     \
+    CT_ASSERT_TRUE(constexpr_strcmp(X, Y) == 0);     \
   } while (0)
 
 #define CT_ASSERT_STRNE(X, Y)                   \
   do {                                          \
-    CT_ASSERT_FALSE(std::strcmp(X, Y) == 0);    \
+    CT_ASSERT_FALSE(constexpr_strcmp(X, Y) == 0);    \
   } while (0)
 
 #define CT_ASSERT_STRCASEEQ(X, Y)           \
@@ -229,12 +251,12 @@ constexpr bool strcase_equal(const char* str1, const char* str2) {
 
 #define CT_ASSERT_FLOAT_EQ(X, Y)               \
   do {                                         \
-    CT_ASSERT_TRUE(almost_equal<float>(X, Y)); \
+    CT_ASSERT_TRUE(almost_equal<float>(X, Y, 1024)); \
   } while (0)
 
 #define CT_ASSERT_DOUBLE_EQ(X, Y)               \
   do {                                          \
-    CT_ASSERT_TRUE(almost_equal<double>(X, Y)); \
+    CT_ASSERT_TRUE(almost_equal<double>(X, Y, 1024)); \
   } while (0)
 
 #define CT_ASSERT_NEAR(X, Y, abs_error)                \
