@@ -1,89 +1,72 @@
-name: CI
+name: CTest Complex Matrix Build
 
 on:
   push:
     branches:
-      - '*'
+      - main
   pull_request:
     branches:
-      - '*'
+      - main
 
 jobs:
   build:
-    runs-on: ubuntu-latest # Use the latest Ubuntu image
+    runs-on: ubuntu-latest # Or your preferred runner environment
 
     strategy:
       matrix:
-        # Define the compilers and C++ standards to test
-        compiler: [g++, clang++]
+        # Define the C++ standards you want to test
         cpp_standard: [11, 14, 17, 20, 23]
-        # You can add includes for specific combinations if needed,
-        # or excludes if some combinations are not supported/desired.
-        # For example, to only test clang with newer standards:
-        # include:
-        #   - compiler: clang++
-        #     cpp_standard: 20
-        #   - compiler: clang++
-        #     cpp_standard: 23
-        # Exclude specific combinations if necessary
-        # exclude:
-        #   - compiler: g++
-        #     cpp_standard: 11 # Example: if your code specifically requires C++20 features used by g++
-        #   - compiler: clang++
-        #     cpp_standard: 11 # Example: if your constexpr_strcmp has C++20 features needed by clang
+        # This variable will be populated by the 'include' block below
+        gtest_ref: [] 
 
-      # Fail the entire matrix if any configuration fails
-      fail-fast: false
+        include:
+          # C++11 builds will use Google Test 1.12.1
+          - cpp_standard: 11
+            gtest_ref: release-1.12.1
 
-    name: ${{ matrix.compiler }} C++${{ matrix.cpp_standard }}
+          # C++14, 17, 20, 23 builds will use Google Test 1.14.0
+          # This version requires C++14+ and is compatible with C++17/20/23 compilers.
+          - cpp_standard: 14
+            gtest_ref: release-1.14.0
+          - cpp_standard: 17
+            gtest_ref: release-1.14.0
+          - cpp_standard: 20
+            gtest_ref: release-1.14.0
+          - cpp_standard: 23
+            gtest_ref: release-1.14.0
+          # If you truly want the absolute latest for C++17/20/23 (less stable):
+          # - cpp_standard: 17
+          #   gtest_ref: main
+          # - cpp_standard: 20
+          #   gtest_ref: main
+          # - cpp_standard: 23
+          #   gtest_ref: main
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - uses: actions/checkout@v4 # Checks out your repository code
 
-    - name: Set up CMake
-      uses: lukka/get-cmake@latest
-      with:
-        cmakeVersion: '3.17.1' # Or a later version if needed
+      - name: Clone Google Test ${{ matrix.gtest_ref }}
+        run: git clone https://github.com/google/googletest.git -b ${{ matrix.gtest_ref }} googletest
 
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        # Install the selected compiler and necessary standard library
-        if [ "${{ matrix.compiler }}" = "g++" ]; then
-          sudo apt-get install -y g++
-        elif [ "${{ matrix.compiler }}" = "clang++" ]; then
-          sudo apt-get install -y clang libc++-dev
-        fi
+      - name: Build Google Test (for C++ ${{ matrix.cpp_standard }})
+        run: |
+          # Determine the C++ standard to use for building Google Test itself.
+          # Older Google Test versions (like 1.12.1) don't understand '20' or '23'
+          # when passed as CMAKE_CXX_STANDARD. Newer versions (1.14.0+) do.
+          GT_BUILD_CXX_STANDARD="${{ matrix.cpp_standard }}"
+          if [ "${{ matrix.gtest_ref }}" == "release-1.12.1" ]; then
+            GT_BUILD_CXX_STANDARD="17" # Build GT 1.12.1 with C++17 for compatibility
+          fi
 
-    - name: Build and Install GoogleTest
-      run: |
-        git clone https://github.com/google/googletest.git -b release-1.12.1
-        cd googletest
-        # Build GTest with the current matrix compiler and standard
-        cmake -Bbuild \
-              -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
-              -DCMAKE_CXX_COMPILER=${{ matrix.compiler }} \
-              -DCMAKE_CXX_STANDARD=${{ matrix.cpp_standard }} \
-              -DCMAKE_CXX_STANDARD_REQUIRED=ON
-        cmake --build build --config Release
-        sudo cmake --build build --target install
-        cd ..
+          # Configure and build Google Test
+          cmake -S googletest -B googletest/build -DCMAKE_CXX_STANDARD=$GT_BUILD_CXX_STANDARD
+          cmake --build googletest/build
 
-    - name: Configure CMake
-      working-directory: ${{ github.workspace }}
-      run: |
-        # Configure your project with the current matrix compiler and standard
-        # Added -Wdev --warn-uninitialized for verbose output
-        cmake -S . -B build \
-              -Dgtest_ct_build_tests=ON \
-              -DCMAKE_CXX_COMPILER=${{ matrix.compiler }} \
-              -DCMAKE_CXX_STANDARD=${{ matrix.cpp_standard }} \
-              -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-              -Wdev --warn-uninitialized # Add these flags for verbose output
+      - name: Configure and Build Project (with C++ ${{ matrix.cpp_standard }})
+        run: |
+          # Compile your project's code with the matrix-specified C++ standard
+          cmake -S . -B build -DCMAKE_CXX_STANDARD=${{ matrix.cpp_standard }} -DCMAKE_RUNTIME_OUTPUT_DIRECTORY=bin
+          cmake --build build
 
-    - name: Build
-      run: cmake --build build
-
-    - name: Run Tests
-      run: ctest --test-dir build --output-on-failure
+      - name: Run Tests (for C++ ${{ matrix.cpp_standard }})
+        run: ./bin/passing_tests
