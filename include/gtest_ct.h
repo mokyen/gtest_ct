@@ -82,7 +82,7 @@ constexpr char char_to_lower(char c) {
 }
 
 // Utility Function: Case-Insensitive String Comparison
-constexpr bool strcase_equal(const char* str1, const char* str2) {
+constexpr bool strcase_equal_old(const char* str1, const char* str2) {
   while (*str1 && *str2) {
     if (char_to_lower(*str1) != char_to_lower(*str2)) {
       return false;
@@ -91,6 +91,14 @@ constexpr bool strcase_equal(const char* str1, const char* str2) {
     ++str2;
   }
   return *str1 == *str2;
+}
+
+constexpr bool strcase_equal(const char* s1, const char* s2) {
+    return (char_to_lower(*s1) == char_to_lower(*s2))
+        ? (*s1 == '\0'
+            ? true
+            : strcase_equal(s1 + 1, s2 + 1))
+        : false;
 }
 
 // EXPECTS
