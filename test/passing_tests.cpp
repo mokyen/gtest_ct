@@ -55,9 +55,12 @@ TEST(CT_EXPECT_TESTS, RELATIONAL_OPERATORS) {
 TEST(CT_EXPECT_TESTS, FLOATING_POINT_COMPARISONS) {
   constexpr float f1 = 0.1f;
   constexpr float f2 = f1 + std::numeric_limits<float>::epsilon();
-
   CT_EXPECT_FLOAT_EQ(f1, f2);
-  CT_EXPECT_DOUBLE_EQ(static_cast<double>(f1), static_cast<double>(f2));
+
+  constexpr double f3 = 0.1f;
+  constexpr double f4 = f3 + std::numeric_limits<double>::epsilon();
+  CT_EXPECT_DOUBLE_EQ(f3, f4);
+
   CT_EXPECT_NEAR(1.0, 1.001, 0.01);
 }
 
@@ -122,9 +125,12 @@ TEST(CT_ASSERT_TESTS, RELATIONAL_OPERATORS) {
 TEST(CT_ASSERT_TESTS, FLOATING_POINT_COMPARISONS) {
   constexpr float f1 = 0.1f;
   constexpr float f2 = f1 + std::numeric_limits<float>::epsilon();
-
   CT_ASSERT_FLOAT_EQ(f1, f2);
-  CT_ASSERT_DOUBLE_EQ(static_cast<double>(f1), static_cast<double>(f2));
+
+  constexpr double f3 = 0.1f;
+  constexpr double f4 = f3 + std::numeric_limits<double>::epsilon();
+  CT_ASSERT_DOUBLE_EQ(f3, f4);
+
   CT_ASSERT_NEAR(1.0, 1.001, 0.01);
 }
 

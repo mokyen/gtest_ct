@@ -68,7 +68,7 @@ struct result {
 
 // Utility Function: ULP-based Floating-Point Comparison
 template <typename T>
-constexpr bool almost_equal(T x, T y, int ulp = 4) {
+constexpr bool almost_equal(T x, T y, int ulp = 5) {
   static_assert(std::is_floating_point<T>::value,
                 "almost_equal is only for floating-point types.");
   return std::abs(x - y) <= std::numeric_limits<T>::epsilon() *
@@ -166,12 +166,12 @@ constexpr bool strcase_equal(const char* s1, const char* s2) {
 
 #define CT_EXPECT_FLOAT_EQ(X, Y)               \
   do {                                         \
-    CT_EXPECT_TRUE(almost_equal<float>(X, Y, 5)); \
+    CT_EXPECT_TRUE(almost_equal<float>(X, Y)); \
   } while (0)
 
 #define CT_EXPECT_DOUBLE_EQ(X, Y)               \
   do {                                          \
-    CT_EXPECT_TRUE(almost_equal<double>(X, Y, 5)); \
+    CT_EXPECT_TRUE(almost_equal<double>(X, Y)); \
   } while (0)
 
 #define CT_EXPECT_NEAR(X, Y, abs_error)                \
@@ -244,12 +244,12 @@ constexpr bool strcase_equal(const char* s1, const char* s2) {
 
 #define CT_ASSERT_FLOAT_EQ(X, Y)               \
   do {                                         \
-    CT_ASSERT_TRUE(almost_equal<float>(X, Y, 5)); \
+    CT_ASSERT_TRUE(almost_equal<float>(X, Y)); \
   } while (0)
 
 #define CT_ASSERT_DOUBLE_EQ(X, Y)               \
   do {                                          \
-    CT_ASSERT_TRUE(almost_equal<double>(X, Y, 5)); \
+    CT_ASSERT_TRUE(almost_equal<double>(X, Y)); \
   } while (0)
 
 #define CT_ASSERT_NEAR(X, Y, abs_error)                \
