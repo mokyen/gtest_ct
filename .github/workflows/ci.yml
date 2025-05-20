@@ -114,5 +114,5 @@ jobs:
           ls -R .
 
       - name: Run Tests (allow failures)
-        continue-on-error: true
+        continue-on-error: false
         run: ./build/test/bin/test_gtest_ct
