@@ -19,7 +19,7 @@ jobs:
           # C++11 → GoogleTest release-1.12.1 (last C++11-compatible)
           - cpp_standard: 11
             gtest_ref: release-1.12.1
-          # C++14+ → GoogleTest v1.14.0 (first stable C++14+)
+          # C++14, 17, 20, 23 → GoogleTest v1.14.0 (first stable C++14+)
           - cpp_standard: 14
             gtest_ref: v1.14.0
           - cpp_standard: 17
@@ -30,42 +30,58 @@ jobs:
             gtest_ref: v1.14.0
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Clone GoogleTest (${{ matrix.gtest_ref }})
         run: |
           git clone https://github.com/google/googletest.git -b ${{ matrix.gtest_ref }} googletest
-          # (Tags note: release-1.12.1 exists; v1.14.0 exists for newer GTest) :contentReference[oaicite:11]{index=11}
+          # (Tags: release-1.12.1 exists; v1.14.0 exists for newer GTest)
 
       - name: Build and Install GoogleTest Locally (no sudo)
         run: |
-          # Determine C++ standard for building GTest
+          # Determine C++ standard for building GTest itself
           GT_BUILD_CXX_STANDARD="${{ matrix.cpp_standard }}"
           if [ "${{ matrix.gtest_ref }}" = "release-1.12.1" ]; then
-            # GTest 1.12.1 doesn’t support setting C++11 in CMAKE_CXX_STANDARD, so force C++17
+            # GTest 1.12.1 doesn’t support CMAKE_CXX_STANDARD=11, so force C++17
             GT_BUILD_CXX_STANDARD="17"
           fi
 
-          # 1) Configure GTest into a local prefix under $HOME/gtest_install
+          # Configure GTest to install under $HOME/gtest_install
           cmake -S googletest \
                 -B googletest/build \
                 -DCMAKE_CXX_STANDARD="$GT_BUILD_CXX_STANDARD" \
                 -DCMAKE_INSTALL_PREFIX="$HOME/gtest_install"
-          # 2) Build GTest
+
+          # Build GTest
           cmake --build googletest/build
 
-          # 3) Install GTest into $HOME/gtest_install (no root needed)
+          # Install GTest into $HOME/gtest_install
           cmake --install googletest/build --prefix "$HOME/gtest_install"
-          echo "Installed GTest under $HOME/gtest_install" :contentReference[oaicite:12]{index=12}
+          echo "Installed GoogleTest under $HOME/gtest_install"
 
       - name: Configure and Build Project (with C++ ${{ matrix.cpp_standard }})
         run: |
+          # Configure the main project, telling CMake to look in $HOME/gtest_install
           cmake -S . -B build \
                 -DCMAKE_CXX_STANDARD=${{ matrix.cpp_standard }} \
                 -DCMAKE_PREFIX_PATH="$HOME/gtest_install" \
                 -DCMAKE_RUNTIME_OUTPUT_DIRECTORY=bin
-          cmake --build build
-          echo "CMake configured with GTest prefix $HOME/gtest_install" :contentReference[oaicite:13]{index=13}
+
+          # Build the project (verbose output to confirm test target)
+          cmake --build build --verbose
+          echo "Finished building project"
+
+      - name: List workspace contents (debug)
+        run: |
+          echo "=== Repository root: $PWD ==="
+          ls -R .
 
       - name: Run Tests (for C++ ${{ matrix.cpp_standard }})
-        run: ./bin/passing_tests
+        run: |
+          # Adjust this path if your test binary is in a different location.
+          # Common locations (after ls -R):
+          #   ./build/bin/passing_tests
+          #   ./build/passing_tests
+          # Here we assume it's under build/bin:
+          ./build/bin/passing_tests
