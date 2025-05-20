@@ -79,9 +79,6 @@ jobs:
 
       - name: Run Tests (for C++ ${{ matrix.cpp_standard }})
         run: |
-          # Adjust this path if your test binary is in a different location.
-          # Common locations (after ls -R):
-          #   ./build/bin/passing_tests
-          #   ./build/passing_tests
-          # Here we assume it's under build/bin:
-          ./build/bin/passing_tests
+          # Based on the debug output, the test binary lives at:
+          #   build/test/bin/test_gtest_ct
+          ./build/test/bin/test_gtest_ct
