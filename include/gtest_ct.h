@@ -166,12 +166,12 @@ constexpr bool strcase_equal(const char* s1, const char* s2) {
 
 #define CT_EXPECT_FLOAT_EQ(X, Y)               \
   do {                                         \
-    CT_EXPECT_TRUE(almost_equal<float>(X, Y)); \
+    CT_EXPECT_TRUE(almost_equal<float>(X, Y, 5)); \
   } while (0)
 
 #define CT_EXPECT_DOUBLE_EQ(X, Y)               \
   do {                                          \
-    CT_EXPECT_TRUE(almost_equal<double>(X, Y)); \
+    CT_EXPECT_TRUE(almost_equal<double>(X, Y, 5)); \
   } while (0)
 
 #define CT_EXPECT_NEAR(X, Y, abs_error)                \
@@ -244,12 +244,12 @@ constexpr bool strcase_equal(const char* s1, const char* s2) {
 
 #define CT_ASSERT_FLOAT_EQ(X, Y)               \
   do {                                         \
-    CT_ASSERT_TRUE(almost_equal<float>(X, Y)); \
+    CT_ASSERT_TRUE(almost_equal<float>(X, Y, 5)); \
   } while (0)
 
 #define CT_ASSERT_DOUBLE_EQ(X, Y)               \
   do {                                          \
-    CT_ASSERT_TRUE(almost_equal<double>(X, Y)); \
+    CT_ASSERT_TRUE(almost_equal<double>(X, Y, 5)); \
   } while (0)
 
 #define CT_ASSERT_NEAR(X, Y, abs_error)                \
