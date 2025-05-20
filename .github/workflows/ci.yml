@@ -3,10 +3,10 @@ name: CTest Complex Matrix Build
 on:
   push:
     branches:
-      - '*'      
+      - '*'       # Trigger on pushes to any branch
   pull_request:
     branches:
-      - '*'      
+      - '*'       # Trigger on PRs targeting any branch
 
 jobs:
   build:
@@ -14,49 +14,99 @@ jobs:
 
     strategy:
       matrix:
+        compiler: [g++, clang++]
         cpp_standard: [11, 14, 17, 20, 23]
         include:
-          - cpp_standard: 11
+          # C++11 → GoogleTest release-1.12.1 (last C++11-compatible)
+          - compiler: g++
+            cpp_standard: 11
             gtest_ref: release-1.12.1
-          - cpp_standard: 14
+          - compiler: clang++
+            cpp_standard: 11
+            gtest_ref: release-1.12.1
+
+          # C++14 → GoogleTest v1.14.0
+          - compiler: g++
+            cpp_standard: 14
             gtest_ref: v1.14.0
-          - cpp_standard: 17
+          - compiler: clang++
+            cpp_standard: 14
             gtest_ref: v1.14.0
-          - cpp_standard: 20
+
+          # C++17 → GoogleTest v1.14.0
+          - compiler: g++
+            cpp_standard: 17
             gtest_ref: v1.14.0
-          - cpp_standard: 23
+          - compiler: clang++
+            cpp_standard: 17
+            gtest_ref: v1.14.0
+
+          # C++20 → GoogleTest v1.14.0
+          - compiler: g++
+            cpp_standard: 20
+            gtest_ref: v1.14.0
+          - compiler: clang++
+            cpp_standard: 20
+            gtest_ref: v1.14.0
+
+          # C++23 → GoogleTest v1.14.0
+          - compiler: g++
+            cpp_standard: 23
+            gtest_ref: v1.14.0
+          - compiler: clang++
+            cpp_standard: 23
             gtest_ref: v1.14.0
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Install compiler (if needed)
+        run: |
+          if [ "${{ matrix.compiler }}" = "clang++" ]; then
+            sudo apt-get update
+            sudo apt-get install -y clang
+          fi
+
       - name: Clone GoogleTest (${{ matrix.gtest_ref }})
         run: |
           git clone https://github.com/google/googletest.git -b ${{ matrix.gtest_ref }} googletest
 
-      - name: Build and Install GoogleTest Locally (no sudo)
+      - name: Build and Install GoogleTest Locally (no sudo prefix on install)
         run: |
+          # Determine which C++ standard to use when building GTest itself
           GT_BUILD_CXX_STANDARD="${{ matrix.cpp_standard }}"
           if [ "${{ matrix.gtest_ref }}" = "release-1.12.1" ]; then
+            # GTest 1.12.1 doesn’t accept C++11 in CMAKE_CXX_STANDARD, so force C++17
             GT_BUILD_CXX_STANDARD="17"
           fi
+
+          # 1) Configure GTest, specifying the compiler and a local install prefix
           cmake -S googletest \
                 -B googletest/build \
+                -DCMAKE_CXX_COMPILER="${{ matrix.compiler }}" \
                 -DCMAKE_CXX_STANDARD="$GT_BUILD_CXX_STANDARD" \
                 -DCMAKE_INSTALL_PREFIX="$HOME/gtest_install"
+
+          # 2) Build GTest
           cmake --build googletest/build
+
+          # 3) Install GTest into $HOME/gtest_install (no root needed)
           cmake --install googletest/build --prefix "$HOME/gtest_install"
           echo "Installed GoogleTest under $HOME/gtest_install"
 
-      - name: Configure and Build Project (with C++ ${{ matrix.cpp_standard }})
+      - name: Configure and Build Project (with C++ ${{ matrix.cpp_standard }} on ${{ matrix.compiler }})
         run: |
+          # Configure your project, pointing CMake at the local GTest install
           cmake -S . -B build \
+                -DCMAKE_CXX_COMPILER="${{ matrix.compiler }}" \
                 -DCMAKE_CXX_STANDARD=${{ matrix.cpp_standard }} \
                 -DCMAKE_PREFIX_PATH="$HOME/gtest_install" \
                 -DCMAKE_RUNTIME_OUTPUT_DIRECTORY=bin
+
+          # Build the project (verbose so you see which compiler and flags are used)
           cmake --build build --verbose
-          echo "Finished building project"
+          echo "Finished building project with ${{ matrix.compiler }} and C++${{ matrix.cpp_standard }}"
 
       - name: List workspace contents (debug)
         run: |
