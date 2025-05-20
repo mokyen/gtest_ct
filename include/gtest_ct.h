@@ -256,3 +256,8 @@ constexpr bool strcase_equal(const char* s1, const char* s2) {
   do {                                                 \
     CT_ASSERT_TRUE(std::abs((X) - (Y)) <= (abs_error)); \
   } while (0)
+
+#define CT_ASSERT_TRUE_SIMPLIFIED_FOR_TEST(X) \
+  do {                                        \
+    ASSERT_TRUE(X) << "Simplified CT_ASSERT_TRUE failure: " #X; \
+  } while (0)
