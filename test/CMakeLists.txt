@@ -8,10 +8,11 @@ find_package(GTest REQUIRED)
 add_executable(test_gtest_ct
     passing_tests.cpp)
 
-if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-    # -save-temps will keep all intermediate files, including .i or .ii files
-    target_compile_options(test_gtest_ct PRIVATE -save-temps)
-endif()
+# Uncomment to see the output of the templates that are added in build/passing_tests.ii
+# if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+#     # -save-temps will keep all intermediate files, including .i or .ii files
+#     target_compile_options(test_gtest_ct PRIVATE -save-temps)
+# endif()
 
 # Link against GTest and your library
 target_link_libraries(test_gtest_ct

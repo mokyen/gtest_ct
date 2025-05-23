@@ -147,11 +147,6 @@ TEST(CT_ASSERT_TESTS, C_STRING_COMPARISONS) {
   CT_ASSERT_STRCASENE(str1, str3);
 }
 
-// TEST(CT_ASSERT_TESTS, CT_ASSERT_DOESNT_CONTINUE) {
-//   EXPECT_FATAL_FAILURE({ CT_ASSERT_TRUE(false); }, "");
-//   EXPECT_TRUE(false) << "This shouldn't be evaluated";
-// }
-
 TEST(CT_ASSERT_TESTS, CT_ASSERT_DOESNT_CONTINUE_3) {
   EXPECT_FATAL_FAILURE({
     CT_ASSERT_TRUE(false); // This should cause a fatal failure within the helper
@@ -160,9 +155,7 @@ TEST(CT_ASSERT_TESTS, CT_ASSERT_DOESNT_CONTINUE_3) {
     // This line should *not* be reached if the CT_ASSERT_TRUE(false) truly caused
     // a fatal failure that aborted the inner execution context of EXPECT_FATAL_FAILURE.
     EXPECT_TRUE(false) << "This shouldn't be evaluated if CT_ASSERT_TRUE is fatal";
-  }, "gtest_ct failure: false"); // You can put the expected substring of the failure message here
-                                 // (e.g., "gtest_ct failure: false" or just "gtest_ct failure").
-                                 // If the message is empty, it matches any message.
+  }, "gtest_ct failure: false");
 }
 
 TEST(CT_ASSERT_TESTS, COMBINED_CT_RT_EXPECT) {
@@ -234,9 +227,3 @@ TEST(CT_ASSERT_FAILURE_TESTS, BASICS2) {
   // EXPECT_FATAL_FAILURE({ CT_ASSERT_NE(A, B); }, "");
   // EXPECT_FATAL_FAILURE({ CT_ASSERT_EQ(A, C); }, "");
 }
-
-// TEST(CT_ASSERT_TESTS, CT_ASSERT_DOESNT_CONTINUE_2) {
-//   // Use the simplified macro for this diagnostic test
-//   EXPECT_FATAL_FAILURE({ CT_ASSERT_TRUE_SIMPLIFIED_FOR_TEST(false); }, "");
-//   EXPECT_TRUE(false) << "This shouldn't be evaluated";
-// }
