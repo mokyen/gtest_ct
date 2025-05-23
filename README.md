@@ -40,3 +40,6 @@ Moving functionality from RT to CT has become an increasing trend in modern C++ 
 ## Future improvements
 
 * Ability to enable/disable failing a build on a CT test failure per compilation unit
+
+
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/mokyen/gtest_ct/badge)](https://scorecard.dev/viewer/?uri=github.com/mokyen/gtest_ct)
