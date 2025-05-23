@@ -12,6 +12,8 @@ target_include_directories(gtest_ct INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/includ
 
 # Add subdirectory for the tests if enabled
 if (gtest_ct_build_tests)
+    # Enable testing
+    enable_testing()
     add_subdirectory(test)
 endif()
 

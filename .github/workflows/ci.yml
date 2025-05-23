@@ -74,37 +74,29 @@ jobs:
 
       - name: Build and Install GoogleTest Locally (no sudo prefix on install)
         run: |
-          # Determine which C++ standard to use when building GTest itself
           GT_BUILD_CXX_STANDARD="${{ matrix.cpp_standard }}"
           if [ "${{ matrix.gtest_ref }}" = "release-1.12.1" ]; then
-            # GTest 1.12.1 doesn’t accept C++11 in CMAKE_CXX_STANDARD, so force C++17
             GT_BUILD_CXX_STANDARD="17"
           fi
 
-          # 1) Configure GTest, specifying the compiler and a local install prefix
           cmake -S googletest \
                 -B googletest/build \
                 -DCMAKE_CXX_COMPILER="${{ matrix.compiler }}" \
                 -DCMAKE_CXX_STANDARD="$GT_BUILD_CXX_STANDARD" \
                 -DCMAKE_INSTALL_PREFIX="$HOME/gtest_install"
 
-          # 2) Build GTest
           cmake --build googletest/build
-
-          # 3) Install GTest into $HOME/gtest_install (no root needed)
           cmake --install googletest/build --prefix "$HOME/gtest_install"
           echo "Installed GoogleTest under $HOME/gtest_install"
 
       - name: Configure and Build Project (with C++ ${{ matrix.cpp_standard }} on ${{ matrix.compiler }})
         run: |
-          # Configure your project, pointing CMake at the local GTest install
           cmake -S . -B build \
                 -DCMAKE_CXX_COMPILER="${{ matrix.compiler }}" \
                 -DCMAKE_CXX_STANDARD=${{ matrix.cpp_standard }} \
                 -DCMAKE_PREFIX_PATH="$HOME/gtest_install" \
                 -DCMAKE_RUNTIME_OUTPUT_DIRECTORY=bin
 
-          # Build the project (verbose so you see which compiler and flags are used)
           cmake --build build --verbose
           echo "Finished building project with ${{ matrix.compiler }} and C++${{ matrix.cpp_standard }}"
 
@@ -113,6 +105,12 @@ jobs:
           echo "=== Repository root: $PWD ==="
           ls -R .
 
-      - name: Run Tests (allow failures)
-        continue-on-error: false
-        run: ./build/test/bin/test_gtest_ct
+      - name: Run All Tests via CTest (unit + compile-fail)
+        run: |
+          cd build
+          ctest --output-on-failure
+
+      - name: Show test results summary
+        run: |
+          cd build
+          ctest --output-on-failure --no-compress-output -T Test
