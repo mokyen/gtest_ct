@@ -30,6 +30,9 @@ endfunction()
 # List of compile-failure tests
 add_compile_fail_test(fail_on_ct_flag
     test_fail_on_ct_flag.cpp 
+)
+
+add_compile_fail_test(fail_on_ct_flag2
     test_fail_on_ct_flag2.cpp 
 )
 
