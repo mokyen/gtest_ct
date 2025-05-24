@@ -16,5 +16,5 @@
 
 TEST(CompileTimeTests, Example2) {
     CT_ASSERT_TRUE(true);
-    CT_ASSERT_TRUE(true);  // This will fail the test at runtime, not compile time.
+    CT_ASSERT_TRUE(false);  // This will fail the test at runtime, not compile time.
 }
