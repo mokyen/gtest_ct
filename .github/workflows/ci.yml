@@ -104,6 +104,23 @@ jobs:
         run: |
           echo "=== Repository root: $PWD ==="
           ls -R .
+      - name: Show compile-fail test sources
+        run: cat test/compilation_fail_tests/*.cpp
+
+      - name: Show CTest test list
+        run: |
+          cd build
+          ctest -N
+          
+      - name: Show CTest test list (verbose)
+        run: |
+          cd build
+          ctest -N --verbose
+
+      - name: Show CTest test list (verbose, no compress)
+        run: |
+          cd build
+          ctest -N --verbose --no-compress-output
 
       - name: Run All Tests via CTest (unit + compile-fail)
         run: |
