@@ -127,9 +127,6 @@ jobs:
           cd build
           ctest -V -L compilefail
 
-      - name: Clean build directory
-        run: rm -rf build
-
       - name: Run All Tests via CTest (unit + compile-fail)
         run: |
           cd build
