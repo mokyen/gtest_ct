@@ -111,7 +111,7 @@ jobs:
         run: |
           cd build
           ctest -N
-          
+
       - name: Show CTest test list (verbose)
         run: |
           cd build
@@ -122,6 +122,13 @@ jobs:
           cd build
           ctest -N --verbose --no-compress-output
 
+      - name: Show CTest verbose output for compile-fail tests
+        run: |
+          cd build
+          ctest -V -L compilefail
+      - name: Clean build directory
+          run: rm -rf build
+
       - name: Run All Tests via CTest (unit + compile-fail)
         run: |
           cd build
@@ -131,3 +138,8 @@ jobs:
         run: |
           cd build
           ctest --output-on-failure --no-compress-output -T Test
+
+      - name: Try manual compile of fail_on_ct_flag.cpp
+        run: |
+          g++ -std=c++17 -Iinclude -c test/compilation_fail_tests/test_fail_on_ct_flag.cpp
+          echo "Manual compile exit code: $?"
