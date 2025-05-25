@@ -139,5 +139,5 @@ jobs:
 
       - name: Try manual compile of fail_on_ct_flag.cpp
         run: |
-          g++ -std=c++17 -Iinclude -c test/compilation_fail_tests/test_fail_on_ct_flag.cpp
+          g++ -std=c++17 -Iinclude -I"$HOME/gtest_install/include" -c test/compilation_fail_tests/test_fail_on_ct_flag.cpp
           echo "Manual compile exit code: $?"
