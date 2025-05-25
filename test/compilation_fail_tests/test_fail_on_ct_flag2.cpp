@@ -15,8 +15,8 @@
 // }
 
 TEST(CompileTimeTests, Example2) {
-    // CT_ASSERT_TRUE(true);
+    CT_ASSERT_TRUE(true);
     // CT_ASSERT_TRUE(true);  // This will fail the test at runtime, not compile time.
-    static_assert(true);  // This will cause a compile-time error.
+    // static_assert(true);  // This will cause a compile-time error.
 
 }
