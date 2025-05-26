@@ -12,7 +12,7 @@ add_compile_fail_test(tu_specific_fail_test tu_specific_fail.cpp)
 # Add runtime test as a regular executable
 add_executable(tu_specific_runtime_test tu_specific_runtime.cpp)
 target_include_directories(tu_specific_runtime_test PRIVATE 
-    ${CMAKE_SOURCE_DIR}/include  # Add this to find gtest_ct.h
+    ${CMAKE_SOURCE_DIR}/include
     ${GTEST_INCLUDE_DIRS}
 )
 target_link_libraries(tu_specific_runtime_test PRIVATE 
@@ -26,8 +26,9 @@ add_test(
     COMMAND tu_specific_runtime_test
 )
 
-# Set runtime test properties
-set_tests_properties(tu_specific_runtime_test PROPERTIES
-    WILL_FAIL TRUE  # We expect this test to fail at runtime
+# Set runtime test properties - we expect this test to fail
+set_tests_properties(tu_specific_runtime_test 
+    PROPERTIES
+    WILL_FAIL TRUE
     LABELS "runtime"
 )
