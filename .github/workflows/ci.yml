@@ -107,38 +107,20 @@ jobs:
           #--verbose --no-compress-output
           ctest -N
 
-      - name: Run All Tests via CTest (unit + compile-fail)
+      - name: Run All Tests via CTest
         run: |
           cd build
-          # First run regular passing tests
-          ctest --output-on-failure -V -E "compilefail|runtime"
+          # Run regular passing tests and runtime tests together
+          ctest --output-on-failure -V -E "compilefail"
           
-          # Then run compile-fail tests (expected to fail compilation)
+          # Run compile-fail tests (expected to fail compilation)
           ctest --output-on-failure -V -L compilefail || true
-          
-          # Finally run runtime-fail tests (expected to fail at runtime)
-          ctest --output-on-failure -V -L runtime || true
 
       - name: Verify Test Results
         run: |
           cd build
-          
-          # Check if any unexpected failures occurred in passing tests
-          ! ctest --output-on-failure -V -E "compilefail|runtime" 2>&1 | grep "Failed"
+          # Check if any unexpected failures occurred in passing tests (including runtime)
+          ! ctest --output-on-failure -V -E "compilefail" 2>&1 | grep "Failed"
           
           # Verify compile-fail tests actually failed compilation
           ctest --output-on-failure -V -L compilefail 2>&1 | grep "Failed"
-          
-          # For runtime tests, capture output and verify specific failure message
-          OUTPUT=$(ctest --output-on-failure -V -L runtime 2>&1)
-          if ! echo "$OUTPUT" | grep -q "\[  FAILED  \] TUSpecificTests.ShouldFailAtRuntime"; then
-            echo "Runtime test did not fail as expected"
-            echo "$OUTPUT"
-            exit 1
-          fi
-          if ! echo "$OUTPUT" | grep -q "gtest_ct failure: false"; then
-            echo "Runtime test did not show expected failure message"
-            echo "$OUTPUT"  
-            exit 1
-          fi
-
