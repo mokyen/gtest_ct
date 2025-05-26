@@ -107,44 +107,11 @@ jobs:
           #--verbose --no-compress-output
           ctest -N
 
-      # - name: Run All Tests via CTest
-      #   run: |
-      #     cd build
-      #     # Run regular passing tests and runtime tests together
-      #     ctest --output-on-failure -V -E "compilefail"
-          
-      #     # Run compile-fail tests (expected to fail compilation)
-      #     # Add -V for more details
-      #     ctest --output-on-failure -L compilefail || true
-
-      - name: Run All Tests via CTest 2
+      - name: Run All Tests via CTest
         run: |
           cd build
           # Run regular passing tests and runtime tests together
           ctest --output-on-failure -V -E "compilefail" || exit 1
           
-          # Run compile-fail tests (expected to fail compilation)
-          # Exit with error if compile-fail tests succeed (they should fail)
-          # Add -V for more details
-          ctest --output-on-failure -L compilefail
-
-      # - name: Verify Test Results
-      #   run: |
-      #     cd build
           
-      #     echo "Checking regular and runtime tests (should pass)..."
-      #     # Store test output in a variable
-      #     TEST_OUTPUT=$(ctest --output-on-failure -V -E "compilefail" 2>&1)
-      #     # Check exit code first
-      #     if [ $? -ne 0 ]; then
-      #       echo "Regular/runtime tests failed unexpectedly"
-      #       echo "$TEST_OUTPUT"
-      #       exit 1
-      #     fi
           
-      #     echo "Checking compile-fail tests (should fail compilation)..."
-      #     # Verify compile-fail tests failed as expected
-      #     if ! ctest --output-on-failure -V -L compilefail 2>&1 | grep -q "Failed"; then
-      #       echo "Compile-fail tests did not fail as expected"
-      #       exit 1
-      #     fi
