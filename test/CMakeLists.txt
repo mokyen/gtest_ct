@@ -1,2 +1,3 @@
 add_subdirectory(passing_tests)
 add_subdirectory(compilation_fail_tests)
+add_subdirectory(tu_specific_tests)

@@ -14,6 +14,11 @@
 #error Please compile for C++11 or higher
 #endif
 
+// Define a unique identifier for each translation unit
+#ifndef GTEST_CT_TU_ENABLED
+#define GTEST_CT_TU_ENABLED 0
+#endif
+
 // C++11 constexpr string
 // Adapted from Scott Schurr, "New Tools for Class and
 // Library Authors", C++Now 2012
@@ -53,9 +58,16 @@ struct result {
 
 // STOP ON COMPILE-TIME FAILURE
 // Define this to fail the build when a CT failure occurs
+// Note that this is a global flag and can be overridden
 // #define STOP_ON_CT_FAIL
 
-#ifdef STOP_ON_CT_FAIL
+// Macro to enable CT failures for this translation unit
+#define ENABLE_CT_FAILURES() static constexpr bool GTEST_CT_TU_ENABLED = true
+
+// Check both global flag and per-translation unit flag
+#if defined(STOP_ON_CT_FAIL)
+#define ASSERT_ON_BUILD(X) static_assert(X, "gtest_ct failure: " #X);
+#elif defined(GTEST_CT_TU_ENABLED) && GTEST_CT_TU_ENABLED
 #define ASSERT_ON_BUILD(X) static_assert(X, "gtest_ct failure: " #X);
 #else
 #define ASSERT_ON_BUILD(X) \

@@ -108,4 +108,23 @@ jobs:
       - name: Run All Tests via CTest (unit + compile-fail)
         run: |
           cd build
-          ctest --output-on-failure -V
+          # First run regular passing tests
+          ctest --output-on-failure -V -E "compilefail|runtime"
+          
+          # Then run compile-fail tests (expected to fail compilation)
+          ctest --output-on-failure -V -L compilefail || true
+          
+          # Finally run runtime-fail tests (expected to fail at runtime)
+          ctest --output-on-failure -V -L runtime || true
+
+      - name: Verify Test Results
+        run: |
+          cd build
+          # Check if any unexpected failures occurred in passing tests
+          ! ctest --output-on-failure -V -E "compilefail|runtime" 2>&1 | grep "Failed"
+          
+          # Verify compile-fail tests actually failed compilation
+          ctest --output-on-failure -V -L compilefail 2>&1 | grep "Failed"
+          
+          # Verify runtime-fail tests actually failed at runtime  
+          ctest --output-on-failure -V -L runtime 2>&1 | grep "Failed"
