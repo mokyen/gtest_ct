@@ -4,5 +4,5 @@
 ENABLE_CT_FAILURES()
 
 TEST(TUSpecificTests, ShouldFailAtCompileTime) {
-    CT_ASSERT_TRUE(false);  // Should fail at compile time
+     EXPECT_FATAL_FAILURE({ CT_ASSERT_TRUE(false); }, "");  // Should fail at compile time. EXPECT_FATAL_FAILURE is a runtime function
 }
