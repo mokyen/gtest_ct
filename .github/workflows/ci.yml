@@ -125,7 +125,7 @@ jobs:
           
           # Run compile-fail tests (expected to fail compilation)
           # Exit with error if compile-fail tests succeed (they should fail)
-          ! ctest --output-on-failure -V -L compilefail
+          ctest --output-on-failure -V -L compilefail
 
       - name: Verify Test Results
         run: |
