@@ -2,5 +2,5 @@
 #include "gtest_ct.h"
 
 TEST(CompileTimeTests, ExpectFailTest_ge) {
-    CT_ASSERT_GE(3, 2);
+    CT_ASSERT_GE(1, 2);
 }
