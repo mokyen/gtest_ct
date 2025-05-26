@@ -127,5 +127,16 @@ jobs:
           # Verify compile-fail tests actually failed compilation
           ctest --output-on-failure -V -L compilefail 2>&1 | grep "Failed"
           
-          # Verify runtime tests failed with the expected GTest failure
-          ctest --output-on-failure -V -L runtime 2>&1 | grep "\[  FAILED  \] TUSpecificTests.ShouldFailAtRuntime"
+          # For runtime tests, capture output and verify specific failure message
+          OUTPUT=$(ctest --output-on-failure -V -L runtime 2>&1)
+          if ! echo "$OUTPUT" | grep -q "\[  FAILED  \] TUSpecificTests.ShouldFailAtRuntime"; then
+            echo "Runtime test did not fail as expected"
+            echo "$OUTPUT"
+            exit 1
+          fi
+          if ! echo "$OUTPUT" | grep -q "gtest_ct failure: false"; then
+            echo "Runtime test did not show expected failure message"
+            echo "$OUTPUT"  
+            exit 1
+          fi
+
