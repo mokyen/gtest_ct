@@ -100,10 +100,12 @@ jobs:
           cmake --build build --verbose
           echo "Finished building project with ${{ matrix.compiler }} and C++${{ matrix.cpp_standard }}"
 
-      - name: Show CTest test list (verbose, no compress)
+      - name: Show CTest test list
         run: |
           cd build
-          ctest -N --verbose --no-compress-output
+          #For debugging purposes, the following flags can be added
+          #--verbose --no-compress-output
+          ctest -N
 
       - name: Run All Tests via CTest (unit + compile-fail)
         run: |

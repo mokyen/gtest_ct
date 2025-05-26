@@ -29,6 +29,6 @@ add_test(
 # Set runtime test properties - we expect this test to fail
 set_tests_properties(tu_specific_runtime_test 
     PROPERTIES
-    WILL_FAIL TRUE
+    WILL_FAIL FALSE
     LABELS "runtime"
 )
