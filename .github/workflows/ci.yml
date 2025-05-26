@@ -100,29 +100,12 @@ jobs:
           cmake --build build --verbose
           echo "Finished building project with ${{ matrix.compiler }} and C++${{ matrix.cpp_standard }}"
 
-      - name: List workspace contents (debug)
-        run: |
-          echo "=== Repository root: $PWD ==="
-          ls -R .
-      - name: Show compile-fail test sources
-        run: cat test/compilation_fail_tests/*.cpp
-
       - name: Show CTest test list (verbose, no compress)
         run: |
           cd build
           ctest -N --verbose --no-compress-output
 
-      - name: Show CTest verbose output for compile-fail tests
-        run: |
-          cd build
-          ctest -V -L compilefail
-
       - name: Run All Tests via CTest (unit + compile-fail)
         run: |
           cd build
-          ctest --output-on-failure
-
-      - name: Show test results summary
-        run: |
-          cd build
-          ctest --output-on-failure --no-compress-output -T Test
+          ctest --output-on-failure -V
