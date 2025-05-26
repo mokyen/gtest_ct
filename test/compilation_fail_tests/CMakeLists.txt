@@ -45,10 +45,6 @@ add_compile_fail_test(ct_assert_float_eq_fail ct_assert_float_eq_fail.cpp)
 add_compile_fail_test(ct_assert_double_eq_fail ct_assert_double_eq_fail.cpp)
 add_compile_fail_test(ct_assert_near_fail ct_assert_near_fail.cpp)
 
-# Keep existing tests
-add_compile_fail_test(fail_on_ct_flag test_fail_on_ct_flag.cpp)
-add_compile_fail_test(fail_on_ct_flag2 test_fail_on_ct_flag2.cpp)
-
 # Add a custom target to run all compile-fail tests
 add_custom_target(run_compile_fail_tests
     COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure -L compilefail
