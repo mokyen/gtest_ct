@@ -38,7 +38,7 @@ TEST(MathTest, CompileTimeValidation) {
 
 **R5**: WHERE different translation units require different behavior, the system SHALL allow enabling/disabling compile-time failures per translation unit, with global configuration taking precedence.
 
-**R6**: WHEN runtime reporting is preferred, the system SHALL collect compile-time failures and report them during test execution, ensuring:
+**R6**: WHEN runtime reporting is preferred, the system SHALL collect compile-time failures and report them during unit test execution, ensuring:
 - **R6.1**: All compile-time errors are caught and reported without missing any
 - **R6.2**: Compile-time and runtime results can be compared for validation
 
@@ -144,7 +144,7 @@ For detailed guidance on using gtest_ct in regulated industries, see [SAFETY_CRI
 
 - Expanded compiler support (MSVC, ICC)
 - Bazel build system support
-- Parametric test support
+- Parameterized test support
 - Integration with static analysis tools  
 - Support for testing template metaprogramming
 - Automated documentation generation for compliance workflows
