@@ -111,7 +111,7 @@ jobs:
         run: |
           echo "Analyzing representative file: test/passing_tests/passing_tests.cpp"
           # Use -header-filter to skip third-party code (e.g. googletest or gtest) completely.
-          clang-tidy test/passing_tests/passing_tests.cpp -p build -header-filter='^(?!.*(googletest|gtest)).*$' || true
+          clang-tidy test/passing_tests/passing_tests.cpp -p build -header-filter='^(?!.*\/googletest\/).*$' || true
 
       - name: Show CTest test list
         run: |
