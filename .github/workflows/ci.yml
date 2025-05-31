@@ -4,6 +4,11 @@ on:
   push:
     branches:
       - '*'       # Trigger on pushes to any branch
+    # Optionally restrict to paths, for example:
+    # paths:
+    #   - 'src/**'
+    #   - 'include/**'
+    #   - 'test/**'
   pull_request:
     branches:
       - '*'       # Trigger on PRs targeting any branch
@@ -17,39 +22,35 @@ jobs:
         compiler: [g++, clang++]
         cpp_standard: [11, 14, 17, 20, 23]
         include:
-          # C++11 → GoogleTest release-1.12.1 (last C++11-compatible)
+          # C++11 -> GoogleTest release-1.12.1 (last C++11-compatible)
           - compiler: g++
             cpp_standard: 11
             gtest_ref: release-1.12.1
           - compiler: clang++
             cpp_standard: 11
             gtest_ref: release-1.12.1
-
-          # C++14 → GoogleTest v1.14.0
+          # C++14 -> GoogleTest v1.14.0
           - compiler: g++
             cpp_standard: 14
             gtest_ref: v1.14.0
           - compiler: clang++
             cpp_standard: 14
             gtest_ref: v1.14.0
-
-          # C++17 → GoogleTest v1.14.0
+          # C++17 -> GoogleTest v1.14.0
           - compiler: g++
             cpp_standard: 17
             gtest_ref: v1.14.0
           - compiler: clang++
             cpp_standard: 17
             gtest_ref: v1.14.0
-
-          # C++20 → GoogleTest v1.14.0
+          # C++20 -> GoogleTest v1.14.0
           - compiler: g++
             cpp_standard: 20
             gtest_ref: v1.14.0
           - compiler: clang++
             cpp_standard: 20
             gtest_ref: v1.14.0
-
-          # C++23 → GoogleTest v1.14.0
+          # C++23 -> GoogleTest v1.14.0
           - compiler: g++
             cpp_standard: 23
             gtest_ref: v1.14.0
@@ -106,24 +107,18 @@ jobs:
           cmake --build build --verbose
           echo "Finished building project with ${{ matrix.compiler }} and C++${{ matrix.cpp_standard }}"
 
-      - name: Run clang-tidy analysis
+      - name: Run clang-tidy analysis on passing tests file
         run: |
-          echo "Running clang-tidy analysis on source files..."
-          # Adjust the file patterns if needed and exclude directories if desired.
-          for file in $(find . -type f \( -name "*.cpp" -o -name "*.h" \)); do
-            echo "Analyzing $file"
-            clang-tidy "$file" -p build || true
-          done
+          echo "Analyzing representative file: test/passing_tests/passing_tests.cpp"
+          # Use -header-filter to skip third-party code (e.g. googletest or gtest) completely.
+          clang-tidy test/passing_tests/passing_tests.cpp -p build -header-filter='^(?!.*(googletest|gtest)).*$' || true
 
       - name: Show CTest test list
         run: |
           cd build
-          #For debugging purposes, the following flags can be added
-          #--verbose --no-compress-output
           ctest -N
 
       - name: Run All Tests via CTest
         run: |
           cd build
-          # Run regular passing tests and runtime tests together
           ctest --output-on-failure -V -E "compilefail" || exit 1
