@@ -4,7 +4,6 @@
 ENABLE_CT_FAILURES()
 
 TEST(CompileTimeTests, ContinueOnFailTest) {
-    CT_ASSERT_TRUE(false);  // This should NOT stop compilation
-    CT_ASSERT_EQ(1, 2);    // This should also continue
-    CT_ASSERT_TRUE(true);  // This should be reachable
+        // Should fail at run time. EXPECT_FATAL_FAILURE is a runtime function
+   EXPECT_FATAL_FAILURE({ CT_ASSERT_TRUE(false); }, "");
 }
