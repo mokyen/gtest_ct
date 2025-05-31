@@ -6,17 +6,34 @@ This document provides guidance for using gtest_ct in regulated industries where
 
 In safety-critical software development, validation requires demonstrable evidence of correctness. Traditional testing approaches may not provide sufficient assurance for systems where failure could result in injury or death. Compile-time testing offers additional verification capabilities that align with regulatory requirements.
 
-## Additional Requirements for Safety-Critical Use (EARS Syntax)
+## Additional Requirements for Safety-Critical Use
 
-Beyond the basic requirements R1-R13 in the README, safety-critical applications should consider these additional requirements:
+Beyond the basic requirements R1-R14 in the README, safety-critical applications should consider these additional requirements. Requirements are specified using [EARS (Easy Approach to Requirements Syntax)](https://alistairmavin.com/ears/) for clarity and testability.
 
-**R14 - Traceability**: WHEN compile-time tests execute, the system SHALL provide traceable results that can be included in validation documentation.
+**R15 - Traceability**: WHEN compile-time tests execute, the system SHALL provide traceable results that can be included in validation documentation.
 
-**R15 - Consistent Results**: WHERE environmental variations exist, compile-time testing SHALL produce identical results across all target compilation environments.
+**R16 - Comprehensive Testing**: WHEN validating safety functions, the system SHALL enable testing of critical boundary conditions and failure modes at compile time.
 
-**R16 - Comprehensive Coverage**: WHEN validating safety functions, the system SHALL enable testing of all boundary conditions and failure modes at compile time.
+## Requirements Traceability
 
-**R17 - Validation Support**: WHERE regulatory documentation is required, the library SHALL provide structured requirements and traceability to support validation processes.
+Complete traceability matrix covering all requirements R1-R16:
+
+| Req ID | Description | Test Location | Test Description |
+|--------|-------------|---------------|------------------|
+| R1-R3 | C++/Compiler Support | CI Pipeline | Matrix build testing all compiler/standard combinations |
+| R4 | CT Error Fails Build | compilation_fail_tests/ | All CT_ASSERT tests verify build failure |
+| R5 | Per-TU CT Failures | tu_specific_tests/ | Tests enabling/disabling per translation unit |
+| R6 | RT Reporting | passing_tests/passing_tests.cpp | CT_EXPECT_FAILURE_TESTS verify RT reporting |
+| R7 | CT Failure Behavior | compilation_fail_tests/ | Both CT_ASSERT and CT_EXPECT stop on failure |
+| R8 | GTest Syntax | passing_tests/passing_tests.cpp | Syntax compatibility validation |
+| R9 | ASSERT/EXPECT Behavior | passing_tests/passing_tests.cpp | CT_ASSERT_TESTS & CT_EXPECT_TESTS |
+| R10 | Custom Messages | passing_tests/passing_tests.cpp | Custom gtest-style failure messages |
+| R11 | Comparisons | compilation_fail_tests/ | EQ, NE, LT, LE, GT, GE tests |
+| R12 | Floating-Point | compilation_fail_tests/ | FLOAT_EQ, DOUBLE_EQ tests |
+| R13 | Strings | compilation_fail_tests/ | STREQ, STRNE, STRCASEEQ, STRCASENE |
+| R14 | Near Testing | compilation_fail_tests/ | CT_ASSERT_NEAR test cases |
+| R15 | Traceability | This document | Requirements mapping and test references |
+| R16 | Boundary Testing | User implementation | Framework supports boundary condition testing |
 
 ## Risk Assessment Framework
 
@@ -75,7 +92,6 @@ The gtest_ct library provides structured requirements and traceability matrices 
 **Requirements Structure**: All functional requirements use EARS syntax for clarity and testability
 **Traceability Matrix**: Direct mapping between requirements and test implementations  
 **Test Validation**: Library tests can be run with your specific build configuration to ensure compatibility
-**Documentation**: Structured documentation supports regulatory review processes
 
 **Recommended Practice**: Run the gtest_ct test suite periodically with your target compilation environment to validate compatibility, but avoid running these processor-intensive tests on every build.
 
@@ -93,6 +109,8 @@ constexpr auto state_machine = build_safety_state_machine();
 CT_EXPECT_EQ(state_machine.transition(SAFE, ALARM_INPUT), ALARM_STATE);
 ```
 
+**Cross-Compilation Validation**: **(Theoretical - not yet validated)** When developing for embedded targets, compile-time tests can execute using the actual target compiler in CI environments, providing validation without requiring hardware execution or complex cross-platform test orchestration.
+
 ## Using gtest_ct in Regulated Environments
 
 The library serves as a tool that can be integrated into existing safety-critical development processes rather than defining those processes. Key integration points include:
@@ -105,8 +123,8 @@ The library serves as a tool that can be integrated into existing safety-critica
 ### Integration Considerations
 
 **CI/CD Integration**: Include periodic validation runs with your target build configuration
-**Documentation**: Use the structured requirements and traceability as inputs to your validation documentation
 **Risk Assessment**: Consider compile-time testing as one component of your overall risk mitigation strategy
+**Process Integration**: Incorporate compile-time testing into existing validation workflows
 
 ## Example: Safety-Critical Test Implementation
 
@@ -139,6 +157,7 @@ TEST_F(SafetyCriticalTest, StateValidation) {
 
 ## Conclusion
 
-This document demonstrates how open source libraries can incorporate practices from regulated industries without compromising innovation. By providing structured approaches to validation, documentation, and quality management, OSS projects can support adoption in safety-critical applications while maintaining the collaborative development model that makes open source powerful.
+This document demonstrates how open source libraries can incorporate practices from regulated industries without compromising innovation. By providing structured approaches to validation and quality management, OSS projects can support adoption in safety-critical applications while maintaining the collaborative development model that makes open source powerful.
 
 The gtest_ct library serves as a practical example of bridging these worlds—offering the rigor needed for life-critical systems while remaining accessible to the broader C++ community.
+

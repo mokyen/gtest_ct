@@ -24,7 +24,9 @@ TEST(MathTest, CompileTimeValidation) {
 }
 ```
 
-## Requirements (EARS Syntax)
+## Requirements
+
+Requirements are specified using [EARS (Easy Approach to Requirements Syntax)](https://alistairmavin.com/ears/) for clarity and testability.
 
 ### Language & Compiler Support
 **R1**: WHEN the library is included in a C++ project, the system SHALL support C++11 and all subsequent standards.
@@ -38,45 +40,27 @@ TEST(MathTest, CompileTimeValidation) {
 
 **R5**: WHERE different translation units require different behavior, the system SHALL allow enabling/disabling compile-time failures per translation unit, with global configuration taking precedence.
 
-**R6**: WHEN runtime reporting is preferred, the system SHALL collect compile-time failures and report them during unit test execution, ensuring:
-- **R6.1**: All compile-time errors are caught and reported without missing any
-- **R6.2**: Compile-time and runtime results can be compared for validation
+**R6**: WHEN runtime reporting is preferred, the system SHALL collect compile-time failures and report them during unit test execution.
 
 **R7**: WHEN compile-time failure mode is enabled, both CT_ASSERT_* and CT_EXPECT_* SHALL behave identically and stop execution on failure.
 
 ### Test Interface
 **R8**: WHEN users write test assertions, the system SHALL provide syntax that matches existing Google Test assertion patterns.
 
-**R8**: WHEN using compile-time CT_ASSERT_* and CT_EXPECT_* calls, the system SHALL:
-- **R8.1**: Behave identically when compile-time failure mode is enabled (both stop on failure)
-- **R8.2**: Make CT_ASSERT_* abort test execution on failure in runtime reporting mode, while CT_EXPECT_* continues, matching Google Test behavior
+**R9**: WHEN using compile-time CT_ASSERT_* and CT_EXPECT_* calls, the system SHALL:
+- **R9.1**: Behave identically when compile-time failure mode is enabled (both stop on failure)
+- **R9.2**: Make CT_ASSERT_* abort test execution on failure in runtime reporting mode, while CT_EXPECT_* continues, matching Google Test behavior
 
-**R9**: WHERE test failures occur, the system SHALL support custom failure messages with the same syntax as Google Test.
+**R10**: WHERE test failures occur, the system SHALL support custom failure messages with the same syntax as Google Test.
 
 ### Test Coverage
-**R10**: WHEN performing comparisons, the system SHALL provide complete coverage of comparison operations (EQ, NE, LT, LE, GT, GE).
+**R11**: WHEN performing comparisons, the system SHALL provide complete coverage of comparison operations (EQ, NE, LT, LE, GT, GE).
 
-**R11**: WHEN testing floating-point values, the system SHALL support floating-point specific comparisons (FLOAT_EQ, DOUBLE_EQ).
+**R12**: WHEN testing floating-point values, the system SHALL support floating-point specific comparisons (FLOAT_EQ, DOUBLE_EQ).
 
-**R12**: WHEN comparing strings, the system SHALL support both case-sensitive and case-insensitive string comparisons (STREQ, STRNE, STRCASEEQ, STRCASENE).
+**R13**: WHEN comparing strings, the system SHALL support both case-sensitive and case-insensitive string comparisons (STREQ, STRNE, STRCASEEQ, STRCASENE).
 
-**R13**: WHEN testing approximate equality, the system SHALL support near-equality testing with configurable tolerance (NEAR).
-
-## Requirements Traceability
-
-| Req ID | Description | Test Location | Test Description |
-|--------|-------------|---------------|------------------|
-| R1-R3  | C++/Compiler Support | CI Pipeline | Matrix build testing all compiler/standard combinations |
-| R4     | CT Error Fails Build | compilation_fail_tests/ | All CT_ASSERT tests verify build failure |
-| R5     | Per-TU CT Failures | tu_specific_tests/ | Tests enabling/disabling per translation unit |
-| R6     | RT Reporting | passing_tests/passing_tests.cpp | CT_EXPECT_FAILURE_TESTS verify RT reporting |
-| R7     | CT Failure Behavior | compilation_fail_tests/ | Both CT_ASSERT and CT_EXPECT stop on failure |
-| R8     | ASSERT/EXPECT | passing_tests/passing_tests.cpp | CT_ASSERT_TESTS & CT_EXPECT_TESTS |
-| R9     | Custom Messages | passing_tests/passing_tests.cpp |  Custom gtest-style failure messages |
-| R10    | Comparisons | compilation_fail_tests/ | EQ, NE, LT, LE, GT, GE tests |
-| R11    | Floating-Point | compilation_fail_tests/ | FLOAT_EQ, DOUBLE_EQ, NEAR tests |
-| R12    | Strings | compilation_fail_tests/ | STREQ, STRNE, STRCASEEQ, STRCASENE |
-| R13    | Near Testing | compilation_fail_tests/ | CT_ASSERT_NEAR test cases |
+**R14**: WHEN testing approximate equality, the system SHALL support near-equality testing with configurable tolerance (NEAR).
 
 ## Why Compile-Time Testing?
 
@@ -92,7 +76,7 @@ TEST(MathTest, CompileTimeValidation) {
 
 **Cross-Compiler Consistency**: Some compilers may perform different calculations at compile time than at runtime - compile-time testing helps catch these discrepancies.
 
-**Consistent Results**: Same test outcomes across all environments and builds.
+**Cross-Compilation Testing**: **(Theoretical - not yet validated)** When cross-compiling for embedded targets, compile-time tests can run using the actual target compiler in your CI environment, providing validation without requiring hardware or target system execution. This could enable automated testing with the real target toolchain while maintaining CI automation and audit trails required for regulated environments.
 
 ## Key Features
 
@@ -133,10 +117,10 @@ The gtest_ct library is thoroughly tested in continuous integration across all s
 
 Moving testing to compile time provides several advantages for software where correctness is critical:
 
-- **Consistent Results**: Same behavior across all environments and builds
 - **Early Detection**: Prevents deployment of code with logical errors
 - **Validation Evidence**: Compilation success provides objective proof of correctness
 - **Risk Mitigation**: Catches undefined behavior that could cause unpredictable failures
+- **Target Compiler Validation**: **(Theoretical)** Enables testing with actual target compiler in cross-compilation scenarios
 
 For detailed guidance on using gtest_ct in regulated industries, see [SAFETY_CRITICAL.md](SAFETY_CRITICAL.md).
 
@@ -147,16 +131,19 @@ For detailed guidance on using gtest_ct in regulated industries, see [SAFETY_CRI
 - Parameterized test support
 - Integration with static analysis tools  
 - Support for testing template metaprogramming
-- Automated documentation generation for compliance workflows
+- Automated report generation for compliance workflows
+- Global override flag to disable compile-time failure mode
+- Fuzzing integration (exploring applicability to compile-time testing)
+- Cross-compilation testing validation (currently theoretical)
 
 ## Quality & Security
 
-[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/mokyen/gtest_ct/badge)](https://scorecard.dev/viewer/?uri=github.com/mokyen/gtest_ct)
+Working to improve [OpenSSF Scorecard](https://scorecard.dev/viewer/?uri=github.com/mokyen/gtest_ct) rating.
 
 ## Contributing
 
-We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+We welcome contributions! Please submit pull requests or create issues for bugs, feature requests, or improvements.
 
 ## License
 
-[Your license information here]
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
