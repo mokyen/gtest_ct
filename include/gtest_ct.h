@@ -1,5 +1,13 @@
 #ifndef GTEST_CT_H_
 #define GTEST_CT_H_
+// =============================================================================
+// Unused Variable for Static Analysis Testing
+// =============================================================================
+
+// Intentionally added to trigger a static analysis warning about an unused variable.
+// Remove or disable after confirming that static analysis is running.
+static int gtest_ct_unused_variable = 42;
+
 
 // =============================================================================
 // Includes
