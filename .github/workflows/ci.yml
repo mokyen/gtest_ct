@@ -1,4 +1,4 @@
-          name: CTest Complex Matrix Build
+name: CTest Complex Matrix Build
 
 on:
   push:
@@ -118,9 +118,12 @@ jobs:
       - name: Show CTest test list
         run: |
           cd build
+          #For debugging purposes, the following flags can be added
+          #--verbose --no-compress-output
           ctest -N
 
       - name: Run All Tests via CTest
         run: |
           cd build
+          # Run regular passing tests and runtime tests together
           ctest --output-on-failure -V -E "compilefail" || exit 1
