@@ -2,5 +2,5 @@
 #include "gtest_ct.h"
 
 TEST(CompileTimeTests, ExpectFailTest_strcasene) {
-    CT_ASSERT_STRCASENE("foo", "FOO");
+    CT_ASSERT_STRCASENE("foo", "FOO");   // NOLINT(clang-diagnostic-error)
 }

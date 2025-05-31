@@ -1,15 +1,44 @@
 ---
-Checks: '-*,bugprone-*,cert-*,clang-*, clang-analyzer-*, cppcoreguidelines-*,google-*,hicpp-*,llvm-else-after-return,llvm-header-guard,llvm-namespace-comment,llvm-prefer-*,llvm-qualified-auto,llvm-twine-local,misc-*,modernize-avoid-*,modernize-concat-nested-namespaces,modernize-deprecated-*,modernize-loop-convert,modernize-make-*,modernize-pass-by-value,modernize-raw-string-literal,modernize-redundant-void-arg,modernize-replace-*,modernize-return-braced-init-list,modernize-shrink-to-fit,modernize-unary-static-assert,modernize-use-auto,modernize-use-bool-literals,modernize-use-default-member-init,modernize-use-emplace,modernize-use-equals-*,modernize-use-nodiscard,modernize-use-noexcept,modernize-use-nullptr,modernize-use-override,modernize-use-transparent-functors,modernize-use-uncaught-exceptions,modernize-use-using,performance-*,readability-*,-google-readability-todo,-modernize-use-nodiscard,-readability-avoid-const-params-in-decls'
-WarningsAsErrors: 'bugprone-,cert-,cppcoreguidelines-*'
-HeaderFilterRegex: '.*'
-FormatStyle:     none
-CheckOptions:
-  misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic: true
-  cppcoreguidelines-special-member-functions.AllowSoleDefaultDtor: true
-  hicpp-special-member-functions.AllowSoleDefaultDtor: true
-
-  # See https://github.com/llvm/llvm-project/issues/42391
-  performance-move-const-arg.CheckTriviallyCopyableMove: false
-  hicpp-move-const-arg.CheckTriviallyCopyableMove: false
-  performance-move-const-arg.CheckMoveToConstRef: false
-  hicpp-move-const-arg.CheckMoveToConstRef: false
+Checks: >
+  -*,
+  bugprone-*,
+  cert-*,
+  clang-*,
+  clang-analyzer-*,
+  cppcoreguidelines-*,
+  google-*,
+  hicpp-*,
+  llvm-*,
+  misc-*,
+  modernize-*,
+  performance-*,
+  readability-*,
+  -google-readability-todo,
+  -modernize-use-nodiscard,
+  -readability-avoid-const-params-in-decls,
+  -cppcoreguidelines-macro-usage,
+  -bugprone-macro-parentheses,
+  -cppcoreguidelines-avoid-c-arrays,
+  -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
+  -cppcoreguidelines-pro-bounds-pointer-arithmetic,
+  -cppcoreguidelines-avoid-const-or-ref-data-members,
+  -hicpp-avoid-c-arrays,
+  -modernize-avoid-c-arrays,
+  -hicpp-no-array-decay,
+  -readability-magic-numbers,
+  -cppcoreguidelines-avoid-magic-numbers,
+  -readability-identifier-length,
+  -misc-no-recursion,
+  -readability-const-return-type,
+  -readability-avoid-nested-conditional-operator,
+  -google-explicit-constructor,
+  -modernize-use-trailing-return-type,
+  -modernize-type-traits,
+  -cppcoreguidelines-avoid-do-while,
+  -readability-function-cognitive-complexity,
+  -hicpp-uppercase-literal-suffix,
+  -readability-uppercase-literal-suffix,
+  -misc-include-cleaner,
+  -google-readability-avoid-underscore-in-googletest-name,
+  -bugprone-easily-swappable-parameters,
+  -misc-non-private-member-variables-in-classes

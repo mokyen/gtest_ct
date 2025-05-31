@@ -1,5 +1,7 @@
+#ifndef GTEST_CT_H_
+#define GTEST_CT_H_
+
 // System headers
-#include <algorithm>
 #include <cctype>
 #include <cmath>
 #include <cstring>
@@ -29,7 +31,7 @@ class str_const {  // constexpr string
 
  public:
   template <std::size_t N>
-  constexpr str_const(const char (&a)[N])  // ctor
+  explicit constexpr str_const(const char (&a)[N])  // ctor
       : p_(a), sz_(N - 1) {}
 
   constexpr const char* const getString() const { return p_; }
@@ -56,17 +58,31 @@ struct result {
   str_const failureMsg;
 };
 
-// STOP ON COMPILE-TIME FAILURE
+/// STOP ON COMPILE-TIME FAILURE
 // Define this to fail the build when a CT failure occurs
 // Note that this is a global flag and can be overridden
 // #define STOP_ON_CT_FAIL
 
+// CONTINUE ON COMPILE-TIME FAILURE
+// Define this to continue the build even when a CT failure occurs
+// Note that this is a global flag and can be overridden
+// #define CONTINUE_ON_CT_FAIL
+
+// Check for conflicting flags
+#if defined(STOP_ON_CT_FAIL) && defined(CONTINUE_ON_CT_FAIL)
+#error Cannot define both STOP_ON_CT_FAIL and CONTINUE_ON_CT_FAIL
+#endif
+
 // Macro to enable CT failures for this translation unit
 #define ENABLE_CT_FAILURES() static constexpr bool GTEST_CT_TU_ENABLED = true
 
-// Check both global flag and per-translation unit flag
+// Check global flags and per-translation unit flag
 #if defined(STOP_ON_CT_FAIL)
 #define ASSERT_ON_BUILD(X) static_assert(X, "gtest_ct failure: " #X);
+#elif defined(CONTINUE_ON_CT_FAIL)
+#define ASSERT_ON_BUILD(X) \
+  do {                     \
+  } while (0);
 #elif defined(GTEST_CT_TU_ENABLED) && GTEST_CT_TU_ENABLED
 #define ASSERT_ON_BUILD(X) static_assert(X, "gtest_ct failure: " #X);
 #else
@@ -79,8 +95,10 @@ struct result {
 #define STREAM_FAILURE_MSG "gtest_ct failure: " << x.failureMsg.getString()
 
 // Utility Function: ULP-based Floating-Point Comparison
+constexpr int DEFAULT_ULP_DISTANCE = 5;
+
 template <typename T>
-constexpr bool almost_equal(T x, T y, int ulp = 5) {
+constexpr bool almost_equal(T x, T y, int ulp = DEFAULT_ULP_DISTANCE) {
   static_assert(std::is_floating_point<T>::value,
                 "almost_equal is only for floating-point types.");
   return std::abs(x - y) <= std::numeric_limits<T>::epsilon() *
@@ -105,7 +123,7 @@ constexpr bool strcase_equal(const char* s1, const char* s2) {
 #define CT_EXPECT_TRUE(X)                             \
   do {                                               \
     ASSERT_ON_BUILD(X)                               \
-    constexpr result x{X, #X};                       \
+    constexpr result x{X, str_const(#X)};            \
     EXPECT_TRUE(x.didTestPass) << STREAM_FAILURE_MSG; \
   } while (0)
 
@@ -183,7 +201,7 @@ constexpr bool strcase_equal(const char* s1, const char* s2) {
 #define CT_ASSERT_TRUE(X)                             \
   do {                                               \
     ASSERT_ON_BUILD(X)                               \
-    constexpr result x{X, #X};                       \
+    constexpr result x{X, str_const(#X)};            \
     ASSERT_TRUE(x.didTestPass) << STREAM_FAILURE_MSG; \
   } while (0)
 
@@ -261,3 +279,5 @@ constexpr bool strcase_equal(const char* s1, const char* s2) {
   do {                                        \
     ASSERT_TRUE(X) << "Simplified CT_ASSERT_TRUE failure: " #X; \
   } while (0)
+
+  #endif  // GTEST_CT_H_

@@ -32,3 +32,21 @@ set_tests_properties(tu_specific_runtime_test
     WILL_FAIL FALSE
     LABELS "runtime"
 )
+
+# Test that continues compilation despite failures
+add_executable(ct_continue_test ct_continue_test.cpp)
+target_include_directories(ct_continue_test  PRIVATE 
+    ${CMAKE_SOURCE_DIR}/include
+    ${GTEST_INCLUDE_DIRS}
+)
+target_link_libraries(ct_continue_test PRIVATE 
+    GTest::GTest 
+    GTest::Main
+)
+add_test(
+    NAME ct_continue_test
+    COMMAND ct_continue_test
+)
+
+# Add to existing compilation fail tests
+add_compile_fail_test(ct_conflicting_flags_fail ct_conflicting_flags_fail.cpp)

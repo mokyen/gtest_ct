@@ -2,5 +2,5 @@
 #include "gtest_ct.h"
 
 TEST(CompileTimeTests, ExpectFailTest_streq) {
-    CT_ASSERT_STREQ("foo", "bar");
+    CT_ASSERT_STREQ("foo", "bar");   // NOLINT(clang-diagnostic-error)
 }

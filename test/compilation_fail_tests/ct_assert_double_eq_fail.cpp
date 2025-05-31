@@ -2,5 +2,5 @@
 #include "gtest_ct.h"
 
 TEST(CompileTimeTests, ExpectFailTest_double_eq) {
-    CT_ASSERT_DOUBLE_EQ(1.0, 2.0);
+    CT_ASSERT_DOUBLE_EQ(1.0, 2.0);  // NOLINT(clang-diagnostic-error)
 }
