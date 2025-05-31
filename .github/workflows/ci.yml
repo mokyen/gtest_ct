@@ -1,4 +1,4 @@
-name: CTest Complex Matrix Build
+          name: CTest Complex Matrix Build
 
 on:
   push:
@@ -68,6 +68,11 @@ jobs:
             sudo apt-get install -y clang
           fi
 
+      - name: Install clang-tidy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-tidy
+
       - name: Clone GoogleTest (${{ matrix.gtest_ref }})
         run: |
           git clone https://github.com/google/googletest.git -b ${{ matrix.gtest_ref }} googletest
@@ -95,23 +100,27 @@ jobs:
                 -DCMAKE_CXX_COMPILER="${{ matrix.compiler }}" \
                 -DCMAKE_CXX_STANDARD=${{ matrix.cpp_standard }} \
                 -DCMAKE_PREFIX_PATH="$HOME/gtest_install" \
-                -DCMAKE_RUNTIME_OUTPUT_DIRECTORY=bin
+                -DCMAKE_RUNTIME_OUTPUT_DIRECTORY=bin \
+                -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 
           cmake --build build --verbose
           echo "Finished building project with ${{ matrix.compiler }} and C++${{ matrix.cpp_standard }}"
 
+      - name: Run clang-tidy analysis
+        run: |
+          echo "Running clang-tidy analysis on source files..."
+          # Adjust the file patterns if needed and exclude directories if desired.
+          for file in $(find . -type f \( -name "*.cpp" -o -name "*.h" \)); do
+            echo "Analyzing $file"
+            clang-tidy "$file" -p build || true
+          done
+
       - name: Show CTest test list
         run: |
           cd build
-          #For debugging purposes, the following flags can be added
-          #--verbose --no-compress-output
           ctest -N
 
       - name: Run All Tests via CTest
         run: |
           cd build
-          # Run regular passing tests and runtime tests together
           ctest --output-on-failure -V -E "compilefail" || exit 1
-          
-          
-          
