@@ -39,8 +39,13 @@
 #endif
 
 // Macro to enable compile-time failures for this translation unit.
-#define ENABLE_CT_FAILURES() static constexpr bool GTEST_CT_TU_ENABLED = true
-
+#ifdef CONTINUE_ON_CT_FAIL
+  // When continuing on CT failures, don't enable compile-time failure behavior.
+  #define ENABLE_CT_FAILURES()
+#else
+  // Otherwise, enable compile-time failures.
+  #define ENABLE_CT_FAILURES() static constexpr bool GTEST_CT_TU_ENABLED = true
+#endif
 // =============================================================================
 // Internal Utilities (in an anonymous namespace or a dedicated namespace)
 // =============================================================================
