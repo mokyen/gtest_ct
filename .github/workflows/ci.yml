@@ -107,11 +107,30 @@ jobs:
           cmake --build build --verbose
           echo "Finished building project with ${{ matrix.compiler }} and C++${{ matrix.cpp_standard }}"
 
-      - name: Run clang-tidy analysis on passing tests file
+      # - name: Run clang-tidy analysis on passing tests file
+      #   run: |
+      #     echo "Analyzing representative file: test/passing_tests/passing_tests.cpp"
+      #     # Use -header-filter to skip third-party code (e.g. googletest or gtest) completely.
+      #     clang-tidy test/passing_tests/passing_tests.cpp -p build -header-filter='^(?!.*\/googletest\/).*$' || true
+      
+      - name: Run clang-tidy analysis
         run: |
-          echo "Analyzing representative file: test/passing_tests/passing_tests.cpp"
-          # Use -header-filter to skip third-party code (e.g. googletest or gtest) completely.
-          clang-tidy test/passing_tests/passing_tests.cpp -p build -header-filter='^(?!.*\/googletest\/).*$' || true
+          echo "Analyzing library header and test files..."
+          FILES_TO_CHECK=(
+            "include/gtest_ct.h"
+            "test/passing_tests/passing_tests.cpp"
+          )
+          
+          for file in "${FILES_TO_CHECK[@]}"; do
+            echo "Analyzing $file..."
+            clang-tidy "$file" \
+              -p build \
+              -header-filter='^(?!.*\/googletest\/).*$' \
+              -- \
+              -std=c++${{ matrix.cpp_standard }} \
+              -I"$HOME/gtest_install/include" \
+              -I"include" || true
+          done
 
       - name: Show CTest test list
         run: |

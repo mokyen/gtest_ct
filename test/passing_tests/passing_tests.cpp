@@ -39,9 +39,16 @@ TEST(CT_EXPECT_TESTS, BASICS) {
   CT_EXPECT_NE(A, C);
 }
 
+namespace  {
+  constexpr int dummy_function() {
+    return 42; // Dummy function to ensure the test compiles
+  }
+}
+
 TEST(CT_EXPECT_TESTS, RELATIONAL_OPERATORS) {
   constexpr int a = 5;
   constexpr int b = 10;
+  constexpr int c = dummy_function();
 
   CT_EXPECT_LT(a, b);
   CT_EXPECT_LE(a, b);
