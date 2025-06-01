@@ -29,38 +29,32 @@ TEST(MathTest, CompileTimeValidation) {
 Requirements are specified using [EARS (Easy Approach to Requirements Syntax)](https://alistairmavin.com/ears/) for clarity and testability.
 
 ### Language & Compiler Support
-**R1**: WHEN the library is included in a C++ project, the system SHALL support C++11 and all subsequent standards.
+**R1**: WHEN compiling with GCC, the system SHALL support C++11, 14, 17, 20, and 23 standards.
 
-**R2**: WHEN compiling with GCC, the system SHALL support C++11, 14, 17, 20, and 23 standards.
-
-**R3**: WHEN compiling with Clang, the system SHALL support C++11, 14, 17, 20, and 23 standards.
+**R2**: WHEN compiling with Clang, the system SHALL support C++11, 14, 17, 20, and 23 standards.
 
 ### Compile-Time Features
-**R4**: WHEN a compile-time test fails, the system SHALL provide the ability to fail compilation immediately via global configuration.
+**R3**: WHEN a compile-time test fails, the system SHALL provide the ability to fail compilation immediately via global configuration.
 
-**R5**: WHERE different translation units require different behavior, the system SHALL allow enabling/disabling compile-time failures per translation unit, with global configuration taking precedence.
+**R4**: WHEN global override for runtime-only reporting is enabled, the system SHALL force all compile-time failures to be reported only at runtime regardless of other settings.
 
-**R6**: WHEN runtime reporting is preferred, the system SHALL collect compile-time failures and report them during unit test execution.
+**R5**: WHEN runtime reporting is preferred, the system SHALL collect compile-time failures and report them during unit test execution.
 
-**R7**: WHEN compile-time failure mode is enabled, both CT_ASSERT_* and CT_EXPECT_* SHALL behave identically and stop execution on failure.
+**R6**: WHEN using compile-time CT_ASSERT_* and CT_EXPECT_* calls, the system SHALL make CT_ASSERT_* abort test execution on failure in runtime reporting mode, while CT_EXPECT_* continues, matching Google Test behavior.
 
 ### Test Interface
-**R8**: WHEN users write test assertions, the system SHALL provide syntax that matches existing Google Test assertion patterns.
+**R7**: WHEN users write test assertions, the system SHALL provide syntax that matches existing Google Test assertion patterns.
 
-**R9**: WHEN using compile-time CT_ASSERT_* and CT_EXPECT_* calls, the system SHALL:
-- **R9.1**: Behave identically when compile-time failure mode is enabled (both stop on failure)
-- **R9.2**: Make CT_ASSERT_* abort test execution on failure in runtime reporting mode, while CT_EXPECT_* continues, matching Google Test behavior
-
-**R10**: WHERE test failures occur, the system SHALL support custom failure messages with the same syntax as Google Test.
+**R8**: WHERE test failures occur, the system SHALL support custom failure messages with the same syntax as Google Test.
 
 ### Test Coverage
-**R11**: WHEN performing comparisons, the system SHALL provide complete coverage of comparison operations (EQ, NE, LT, LE, GT, GE).
+**R9**: WHEN performing comparisons, the system SHALL provide complete coverage of comparison operations (EQ, NE, LT, LE, GT, GE).
 
-**R12**: WHEN testing floating-point values, the system SHALL support floating-point specific comparisons (FLOAT_EQ, DOUBLE_EQ).
+**R10**: WHEN testing floating-point values, the system SHALL support floating-point specific comparisons (FLOAT_EQ, DOUBLE_EQ).
 
-**R13**: WHEN comparing strings, the system SHALL support both case-sensitive and case-insensitive string comparisons (STREQ, STRNE, STRCASEEQ, STRCASENE).
+**R11**: WHEN comparing strings, the system SHALL support both case-sensitive and case-insensitive string comparisons (STREQ, STRNE, STRCASEEQ, STRCASENE).
 
-**R14**: WHEN testing approximate equality, the system SHALL support near-equality testing with configurable tolerance (NEAR).
+**R12**: WHEN testing approximate equality, the system SHALL support near-equality testing with configurable tolerance (NEAR).
 
 ## Why Compile-Time Testing?
 
@@ -82,8 +76,8 @@ Requirements are specified using [EARS (Easy Approach to Requirements Syntax)](h
 
 - **Broad Compiler Support**: Works with GCC and Clang across C++11 through C++23
 - **CMake Integration**: Full CMake support for easy project integration
-- **Flexible Failure Modes**: Choose between immediate compilation failure or runtime reporting
-- **Per-Translation Unit Control**: Configure behavior differently for different source files, with global override capability
+- **Flexible Failure Modes**: Choose between immediate compilation failure, runtime reporting, or global runtime-only mode
+- **Global Override Control**: Force all tests to runtime-only reporting regardless of other settings
 - **Complete Test Coverage**: All major comparison types including floating-point and strings
 - **Google Test Compatible**: CT_ASSERT_* and CT_EXPECT_* syntax matching Google Test patterns
 - **Header-Only**: Just include and go
@@ -99,19 +93,24 @@ Requirements are specified using [EARS (Easy Approach to Requirements Syntax)](h
 #define STOP_ON_CT_FAIL
 #include "gtest_ct.h"
 
-// Option 3: Per-translation unit configuration
-// Global STOP_ON_CT_FAIL overrides local settings
+// Option 3: Force all tests to runtime-only reporting (global override)
+#define CONTINUE_ON_CT_FAIL
+#include "gtest_ct.h"
+
+// Option 4: Per-translation unit configuration (when no global override is set)
 ENABLE_CT_FAILURES(); // Enable for this translation unit
 #include "gtest_ct.h"
 ```
 
 ## Testing and Validation
 
-The gtest_ct library is thoroughly tested in continuous integration across all supported compiler and standard combinations. 
+The gtest_ct library is thoroughly tested in continuous integration across all supported compiler and standard combinations, with static analysis using clang-tidy integrated into the CI pipeline.
 
 **Running Tests Locally**: Tests can be run locally for validation, but due to the processor-intensive nature of compilation-failure tests, it's recommended to run these periodically rather than on every build.
 
 **CI Integration**: For projects using gtest_ct, consider running the library's test suite periodically with your specific build configuration to ensure compatibility, but avoid running on every build due to performance impact.
+
+**Static Analysis**: The library is validated with clang-tidy static analysis on passing tests to ensure code quality and catch potential issues.
 
 ## Benefits for High-Reliability Software
 
@@ -129,10 +128,8 @@ For detailed guidance on using gtest_ct in regulated industries, see [SAFETY_CRI
 - Expanded compiler support (MSVC, ICC)
 - Bazel build system support
 - Parameterized test support
-- Integration with static analysis tools  
 - Support for testing template metaprogramming
 - Automated report generation for compliance workflows
-- Global override flag to disable compile-time failure mode
 - Fuzzing integration (exploring applicability to compile-time testing)
 - Cross-compilation testing validation (currently theoretical)
 
