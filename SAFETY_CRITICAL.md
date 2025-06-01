@@ -10,30 +10,29 @@ In safety-critical software development, validation requires demonstrable eviden
 
 Beyond the basic requirements R1-R14 in the README, safety-critical applications should consider these additional requirements. Requirements are specified using [EARS (Easy Approach to Requirements Syntax)](https://alistairmavin.com/ears/) for clarity and testability.
 
-**R15 - Traceability**: WHEN compile-time tests execute, the system SHALL provide traceable results that can be included in validation documentation.
+**R13 - Traceability**: WHEN compile-time tests execute, the system SHALL provide traceable results that can be included in validation documentation.
 
-**R16 - Comprehensive Testing**: WHEN validating safety functions, the system SHALL enable testing of critical boundary conditions and failure modes at compile time.
+**R14 - Comprehensive Testing**: WHEN validating safety functions, the system SHALL enable testing of critical boundary conditions and failure modes at compile time.
 
 ## Requirements Traceability
 
-Complete traceability matrix covering all requirements R1-R16:
+Complete traceability matrix covering all requirements R1-R14:
 
 | Req ID | Description | Test Location | Test Description |
 |--------|-------------|---------------|------------------|
-| R1-R3 | C++/Compiler Support | CI Pipeline | Matrix build testing all compiler/standard combinations |
-| R4 | CT Error Fails Build | compilation_fail_tests/ | All CT_ASSERT tests verify build failure |
-| R5 | Per-TU CT Failures | tu_specific_tests/ | Tests enabling/disabling per translation unit |
-| R6 | RT Reporting | passing_tests/passing_tests.cpp | CT_EXPECT_FAILURE_TESTS verify RT reporting |
-| R7 | CT Failure Behavior | compilation_fail_tests/ | Both CT_ASSERT and CT_EXPECT stop on failure |
-| R8 | GTest Syntax | passing_tests/passing_tests.cpp | Syntax compatibility validation |
-| R9 | ASSERT/EXPECT Behavior | passing_tests/passing_tests.cpp | CT_ASSERT_TESTS & CT_EXPECT_TESTS |
-| R10 | Custom Messages | passing_tests/passing_tests.cpp | Custom gtest-style failure messages |
-| R11 | Comparisons | compilation_fail_tests/ | EQ, NE, LT, LE, GT, GE tests |
-| R12 | Floating-Point | compilation_fail_tests/ | FLOAT_EQ, DOUBLE_EQ tests |
-| R13 | Strings | compilation_fail_tests/ | STREQ, STRNE, STRCASEEQ, STRCASENE |
-| R14 | Near Testing | compilation_fail_tests/ | CT_ASSERT_NEAR test cases |
-| R15 | Traceability | This document | Requirements mapping and test references |
-| R16 | Boundary Testing | User implementation | Framework supports boundary condition testing |
+| R1-R2  | C++/Compiler Support | CI Pipeline | Matrix build testing all compiler/standard combinations |
+| R3     | CT Error Fails Build | compilation_fail_tests/ | All CT_ASSERT tests verify build failure |
+| R4     | Global Runtime Override | CI Pipeline | CONTINUE_ON_CT_FAIL flag testing |
+| R5     | RT Reporting | passing_tests/passing_tests.cpp | CT_EXPECT_FAILURE_TESTS verify RT reporting |
+| R6     | ASSERT/EXPECT Behavior | passing_tests/passing_tests.cpp | CT_ASSERT_TESTS & CT_EXPECT_TESTS |
+| R7     | GTest Syntax | passing_tests/passing_tests.cpp | Syntax compatibility validation |
+| R8     | Custom Messages | passing_tests/passing_tests.cpp | Custom gtest-style failure messages |
+| R9     | Comparisons | compilation_fail_tests/ | EQ, NE, LT, LE, GT, GE tests |
+| R10    | Floating-Point | compilation_fail_tests/ | FLOAT_EQ, DOUBLE_EQ tests |
+| R11    | Strings | compilation_fail_tests/ | STREQ, STRNE, STRCASEEQ, STRCASENE |
+| R12    | Near Testing | compilation_fail_tests/ | CT_ASSERT_NEAR test cases |
+| R13    | Traceability | This document | Requirements mapping and test references |
+| R14    | Boundary Testing | User implementation | Framework supports boundary condition testing |
 
 ## Risk Assessment Framework
 
@@ -160,4 +159,3 @@ TEST_F(SafetyCriticalTest, StateValidation) {
 This document demonstrates how open source libraries can incorporate practices from regulated industries without compromising innovation. By providing structured approaches to validation and quality management, OSS projects can support adoption in safety-critical applications while maintaining the collaborative development model that makes open source powerful.
 
 The gtest_ct library serves as a practical example of bridging these worlds—offering the rigor needed for life-critical systems while remaining accessible to the broader C++ community.
-
