@@ -70,12 +70,11 @@ namespace gtest_ct_internal {
 class str_const {
 private:
   const char* const p_;
-  const std::size_t sz_;
 
 public:
   template <std::size_t N>
   explicit constexpr str_const(const char (&a)[N])
-      : p_(a), sz_(N - 1) {}
+      : p_(a) {}
 
   constexpr const char* getString() const { return p_; }
 };
@@ -123,13 +122,14 @@ constexpr bool strcase_equal(const char* s1, const char* s2) {
 
 // Expose necessary types to the global scope.
 struct result {
+
 #if __cplusplus < 202002
-  constexpr result(bool assertion, gtest_ct_internal::str_const msg)
-      : didTestPass{assertion}, failureMsg{msg} {}
+  constexpr
 #else
-  consteval result(bool assertion, gtest_ct_internal::str_const msg)
-      : didTestPass{assertion}, failureMsg{msg} {}
+  consteval
 #endif
+  result(bool assertion, gtest_ct_internal::str_const msg)
+    : didTestPass{assertion}, failureMsg{msg} {}
 
   const bool didTestPass;
   gtest_ct_internal::str_const failureMsg;
@@ -140,13 +140,13 @@ struct result {
 // =============================================================================
 
 #if defined(STOP_ON_CT_FAIL)
-  #define ASSERT_ON_BUILD(X) static_assert(X, "gtest_ct failure: " #X);
+  #define ASSERT_ON_BUILD(X) static_assert(X, "gtest_ct failure: " #X)
 #elif defined(CONTINUE_ON_CT_FAIL)
-  #define ASSERT_ON_BUILD(X) do {} while (0);
+  #define ASSERT_ON_BUILD(X) do {} while (0)
 #elif defined(GTEST_CT_TU_ENABLED) && GTEST_CT_TU_ENABLED
-  #define ASSERT_ON_BUILD(X) static_assert(X, "gtest_ct failure: " #X);
+  #define ASSERT_ON_BUILD(X) static_assert(X, "gtest_ct failure: " #X)
 #else
-  #define ASSERT_ON_BUILD(X) do {} while (0);
+  #define ASSERT_ON_BUILD(X) do {} while (0)
 #endif
 
 #define STREAM_FAILURE_MSG "gtest_ct failure: " << x.failureMsg.getString()
@@ -161,7 +161,7 @@ struct result {
 // ----- Expectations (non-fatal) -----
 #define CT_EXPECT_TRUE(X)                             \
   do {                                                \
-    ASSERT_ON_BUILD(X)                                \
+    ASSERT_ON_BUILD(X);                               \
     constexpr result x{X, gtest_ct_internal::str_const(#X)};  \
     EXPECT_TRUE(x.didTestPass) << STREAM_FAILURE_MSG; \
   } while (0)
@@ -178,7 +178,7 @@ struct result {
 
 #define CT_EXPECT_NE(X, Y)      \
   do {                          \
-    CT_EXPECT_FALSE((X) == (Y));    \
+    CT_EXPECT_TRUE((X) != (Y));    \
   } while (0)
 
 #define CT_EXPECT_LT(X, Y)    \
@@ -208,7 +208,7 @@ struct result {
 
 #define CT_EXPECT_STRNE(X, Y)                   \
   do {                                          \
-    CT_EXPECT_FALSE(gtest_ct_internal::constexpr_strcmp(X, Y) == 0);    \
+    CT_EXPECT_TRUE(gtest_ct_internal::constexpr_strcmp(X, Y) != 0);    \
   } while (0)
 
 #define CT_EXPECT_STRCASEEQ(X, Y)           \
@@ -239,7 +239,7 @@ struct result {
 // ----- Assertions (fatal) -----
 #define CT_ASSERT_TRUE(X)                             \
   do {                                                \
-    ASSERT_ON_BUILD(X)                                \
+    ASSERT_ON_BUILD(X);                               \
     constexpr result x{X, gtest_ct_internal::str_const(#X)};  \
     ASSERT_TRUE(x.didTestPass) << STREAM_FAILURE_MSG; \
   } while (0)
@@ -256,7 +256,7 @@ struct result {
 
 #define CT_ASSERT_NE(X, Y)      \
   do {                          \
-    CT_ASSERT_FALSE((X) == (Y));    \
+    CT_ASSERT_TRUE((X) != (Y));    \
   } while (0)
 
 #define CT_ASSERT_LT(X, Y)     \
@@ -286,7 +286,7 @@ struct result {
 
 #define CT_ASSERT_STRNE(X, Y)                   \
   do {                                          \
-    CT_ASSERT_FALSE(gtest_ct_internal::constexpr_strcmp(X, Y) == 0);    \
+    CT_ASSERT_TRUE(gtest_ct_internal::constexpr_strcmp(X, Y) != 0);    \
   } while (0)
 
 #define CT_ASSERT_STRCASEEQ(X, Y)           \
@@ -312,11 +312,6 @@ struct result {
 #define CT_ASSERT_NEAR(X, Y, abs_error)                \
   do {                                                 \
     CT_ASSERT_TRUE(std::abs((X) - (Y)) <= (abs_error)); \
-  } while (0)
-
-#define CT_ASSERT_TRUE_SIMPLIFIED_FOR_TEST(X) \
-  do {                                        \
-    ASSERT_TRUE(X) << "Simplified CT_ASSERT_TRUE failure: " #X; \
   } while (0)
 
 #endif  // GTEST_CT_H_
