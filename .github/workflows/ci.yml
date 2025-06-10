@@ -102,8 +102,8 @@ jobs:
                 -DCMAKE_CXX_STANDARD=${{ matrix.cpp_standard }} \
                 -DCMAKE_PREFIX_PATH="$HOME/gtest_install" \
                 -DCMAKE_RUNTIME_OUTPUT_DIRECTORY=bin \
-                -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
-
+                -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+                -Dgtest_ct_build_tests=ON
           cmake --build build --verbose
           echo "Finished building project with ${{ matrix.compiler }} and C++${{ matrix.cpp_standard }}"
 

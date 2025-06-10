@@ -116,6 +116,9 @@ constexpr bool strcase_equal(const char* s1, const char* s2) {
 
 } // namespace gtest_ct_internal
 
+#define GTEST_CT_CONCAT_IMPL(x, y) x##y
+#define GTEST_CT_CONCAT(x, y) GTEST_CT_CONCAT_IMPL(x, y)
+
 // =============================================================================
 // Test Result Structure
 // =============================================================================
@@ -142,14 +145,12 @@ struct result {
 #if defined(STOP_ON_CT_FAIL)
   #define ASSERT_ON_BUILD(X) static_assert(X, "gtest_ct failure: " #X)
 #elif defined(CONTINUE_ON_CT_FAIL)
-  #define ASSERT_ON_BUILD(X) do {} while (0)
+  #define ASSERT_ON_BUILD(X) ((void)0)
 #elif defined(GTEST_CT_TU_ENABLED) && GTEST_CT_TU_ENABLED
   #define ASSERT_ON_BUILD(X) static_assert(X, "gtest_ct failure: " #X)
 #else
-  #define ASSERT_ON_BUILD(X) do {} while (0)
+  #define ASSERT_ON_BUILD(X) ((void)0)
 #endif
-
-#define STREAM_FAILURE_MSG "gtest_ct failure: " << x.failureMsg.getString()
 
 // =============================================================================
 // Compile-Time Expectation and Assertion Macros
@@ -159,159 +160,104 @@ struct result {
 // in a namespace or split into a separate header if desired.
 
 // ----- Expectations (non-fatal) -----
-#define CT_EXPECT_TRUE(X)                             \
-  do {                                                \
-    ASSERT_ON_BUILD(X);                               \
-    constexpr result x{X, gtest_ct_internal::str_const(#X)};  \
-    EXPECT_TRUE(x.didTestPass) << STREAM_FAILURE_MSG; \
-  } while (0)
+
+#define CT_EXPECT_TRUE(X) \
+  ASSERT_ON_BUILD(X); \
+  constexpr bool GTEST_CT_CONCAT(__gtest_ct_bool_, __LINE__) = (X); \
+  constexpr result GTEST_CT_CONCAT(__gtest_ct_result_, __LINE__){GTEST_CT_CONCAT(__gtest_ct_bool_, __LINE__), gtest_ct_internal::str_const(#X)}; \
+  EXPECT_TRUE(GTEST_CT_CONCAT(__gtest_ct_result_, __LINE__).didTestPass) \
+    << "gtest_ct failure: " << GTEST_CT_CONCAT(__gtest_ct_result_, __LINE__).failureMsg.getString()
 
 #define CT_EXPECT_FALSE(X) \
-  do {                     \
-    CT_EXPECT_TRUE(!(X));  \
-  } while (0)
+  CT_EXPECT_TRUE(!(X))
 
-#define CT_EXPECT_EQ(X, Y)    \
-  do {                        \
-    CT_EXPECT_TRUE((X) == (Y));   \
-  } while (0)
+#define CT_EXPECT_EQ(X, Y) \
+  CT_EXPECT_TRUE((X) == (Y))
 
-#define CT_EXPECT_NE(X, Y)      \
-  do {                          \
-    CT_EXPECT_TRUE((X) != (Y));    \
-  } while (0)
+#define CT_EXPECT_NE(X, Y) \
+  CT_EXPECT_TRUE((X) != (Y))
 
-#define CT_EXPECT_LT(X, Y)    \
-  do {                        \
-    CT_EXPECT_TRUE((X) < (Y)); \
-  } while (0)
+#define CT_EXPECT_LT(X, Y) \
+  CT_EXPECT_TRUE((X) < (Y))
 
-#define CT_EXPECT_LE(X, Y)     \
-  do {                         \
-    CT_EXPECT_TRUE((X) <= (Y)); \
-  } while (0)
+#define CT_EXPECT_LE(X, Y) \
+  CT_EXPECT_TRUE((X) <= (Y))
 
-#define CT_EXPECT_GT(X, Y)    \
-  do {                        \
-    CT_EXPECT_TRUE((X) > (Y)); \
-  } while (0)
+#define CT_EXPECT_GT(X, Y) \
+  CT_EXPECT_TRUE((X) > (Y))
 
-#define CT_EXPECT_GE(X, Y)     \
-  do {                         \
-    CT_EXPECT_TRUE((X) >= (Y)); \
-  } while (0)
+#define CT_EXPECT_GE(X, Y) \
+  CT_EXPECT_TRUE((X) >= (Y))
 
-#define CT_EXPECT_STREQ(X, Y)                   \
-  do {                                          \
-    CT_EXPECT_TRUE(gtest_ct_internal::constexpr_strcmp(X, Y) == 0);     \
-  } while (0)
+#define CT_EXPECT_STREQ(X, Y) \
+  CT_EXPECT_TRUE(gtest_ct_internal::constexpr_strcmp(X, Y) == 0)
 
-#define CT_EXPECT_STRNE(X, Y)                   \
-  do {                                          \
-    CT_EXPECT_TRUE(gtest_ct_internal::constexpr_strcmp(X, Y) != 0);    \
-  } while (0)
+#define CT_EXPECT_STRNE(X, Y) \
+  CT_EXPECT_TRUE(gtest_ct_internal::constexpr_strcmp(X, Y) != 0)
 
-#define CT_EXPECT_STRCASEEQ(X, Y)           \
-  do {                                      \
-    CT_EXPECT_TRUE(gtest_ct_internal::strcase_equal(X, Y));    \
-  } while (0)
+#define CT_EXPECT_STRCASEEQ(X, Y) \
+  CT_EXPECT_TRUE(gtest_ct_internal::strcase_equal(X, Y))
 
-#define CT_EXPECT_STRCASENE(X, Y)           \
-  do {                                      \
-    CT_EXPECT_FALSE(gtest_ct_internal::strcase_equal(X, Y));   \
-  } while (0)
+#define CT_EXPECT_STRCASENE(X, Y) \
+  CT_EXPECT_FALSE(gtest_ct_internal::strcase_equal(X, Y))
 
-#define CT_EXPECT_FLOAT_EQ(X, Y)               \
-  do {                                         \
-    CT_EXPECT_TRUE(gtest_ct_internal::almost_equal<float>(X, Y)); \
-  } while (0)
+#define CT_EXPECT_FLOAT_EQ(X, Y) \
+  CT_EXPECT_TRUE(gtest_ct_internal::almost_equal<float>(X, Y))
 
-#define CT_EXPECT_DOUBLE_EQ(X, Y)               \
-  do {                                          \
-    CT_EXPECT_TRUE(gtest_ct_internal::almost_equal<double>(X, Y)); \
-  } while (0)
+#define CT_EXPECT_DOUBLE_EQ(X, Y) \
+  CT_EXPECT_TRUE(gtest_ct_internal::almost_equal<double>(X, Y))
 
-#define CT_EXPECT_NEAR(X, Y, abs_error)                \
-  do {                                                 \
-    CT_EXPECT_TRUE(std::abs((X) - (Y)) <= (abs_error)); \
-  } while (0)
+#define CT_EXPECT_NEAR(X, Y, abs_error) \
+  CT_EXPECT_TRUE(std::abs((X) - (Y)) <= (abs_error))
 
 // ----- Assertions (fatal) -----
-#define CT_ASSERT_TRUE(X)                             \
-  do {                                                \
-    ASSERT_ON_BUILD(X);                               \
-    constexpr result x{X, gtest_ct_internal::str_const(#X)};  \
-    ASSERT_TRUE(x.didTestPass) << STREAM_FAILURE_MSG; \
-  } while (0)
+#define CT_ASSERT_TRUE(X) \
+  ASSERT_ON_BUILD(X); \
+  constexpr bool GTEST_CT_CONCAT(__gtest_ct_bool_, __LINE__) = (X); \
+  constexpr result GTEST_CT_CONCAT(__gtest_ct_result_, __LINE__){GTEST_CT_CONCAT(__gtest_ct_bool_, __LINE__), gtest_ct_internal::str_const(#X)}; \
+  ASSERT_TRUE(GTEST_CT_CONCAT(__gtest_ct_result_, __LINE__).didTestPass) \
+    << "gtest_ct failure: " << GTEST_CT_CONCAT(__gtest_ct_result_, __LINE__).failureMsg.getString()
 
 #define CT_ASSERT_FALSE(X) \
-  do {                     \
-    CT_ASSERT_TRUE(!(X));  \
-  } while (0)
+  CT_ASSERT_TRUE(!(X))
 
-#define CT_ASSERT_EQ(X, Y)    \
-  do {                        \
-    CT_ASSERT_TRUE((X) == (Y));   \
-  } while (0)
+#define CT_ASSERT_EQ(X, Y) \
+  CT_ASSERT_TRUE((X) == (Y))
 
-#define CT_ASSERT_NE(X, Y)      \
-  do {                          \
-    CT_ASSERT_TRUE((X) != (Y));    \
-  } while (0)
+#define CT_ASSERT_NE(X, Y) \
+  CT_ASSERT_TRUE((X) != (Y))
 
-#define CT_ASSERT_LT(X, Y)     \
-  do {                         \
-    CT_ASSERT_TRUE((X) < (Y)); \
-  } while (0)
+#define CT_ASSERT_LT(X, Y) \
+  CT_ASSERT_TRUE((X) < (Y))
 
-#define CT_ASSERT_LE(X, Y)      \
-  do {                          \
-    CT_ASSERT_TRUE((X) <= (Y)); \
-  } while (0)
+#define CT_ASSERT_LE(X, Y) \
+  CT_ASSERT_TRUE((X) <= (Y))
 
-#define CT_ASSERT_GT(X, Y)     \
-  do {                         \
-    CT_ASSERT_TRUE((X) > (Y)); \
-  } while (0)
+#define CT_ASSERT_GT(X, Y) \
+  CT_ASSERT_TRUE((X) > (Y))
 
-#define CT_ASSERT_GE(X, Y)      \
-  do {                          \
-    CT_ASSERT_TRUE((X) >= (Y)); \
-  } while (0)
+#define CT_ASSERT_GE(X, Y) \
+  CT_ASSERT_TRUE((X) >= (Y))
 
-#define CT_ASSERT_STREQ(X, Y)                   \
-  do {                                          \
-    CT_ASSERT_TRUE(gtest_ct_internal::constexpr_strcmp(X, Y) == 0);     \
-  } while (0)
+#define CT_ASSERT_STREQ(X, Y) \
+  CT_ASSERT_TRUE(gtest_ct_internal::constexpr_strcmp(X, Y) == 0)
 
-#define CT_ASSERT_STRNE(X, Y)                   \
-  do {                                          \
-    CT_ASSERT_TRUE(gtest_ct_internal::constexpr_strcmp(X, Y) != 0);    \
-  } while (0)
+#define CT_ASSERT_STRNE(X, Y) \
+  CT_ASSERT_TRUE(gtest_ct_internal::constexpr_strcmp(X, Y) != 0)
 
-#define CT_ASSERT_STRCASEEQ(X, Y)           \
-  do {                                      \
-    CT_ASSERT_TRUE(gtest_ct_internal::strcase_equal(X, Y));    \
-  } while (0)
+#define CT_ASSERT_STRCASEEQ(X, Y) \
+  CT_ASSERT_TRUE(gtest_ct_internal::strcase_equal(X, Y))
 
-#define CT_ASSERT_STRCASENE(X, Y)           \
-  do {                                      \
-    CT_ASSERT_FALSE(gtest_ct_internal::strcase_equal(X, Y));   \
-  } while (0)
+#define CT_ASSERT_STRCASENE(X, Y) \
+  CT_ASSERT_FALSE(gtest_ct_internal::strcase_equal(X, Y))
 
-#define CT_ASSERT_FLOAT_EQ(X, Y)               \
-  do {                                         \
-    CT_ASSERT_TRUE(gtest_ct_internal::almost_equal<float>(X, Y)); \
-  } while (0)
+#define CT_ASSERT_FLOAT_EQ(X, Y) \
+  CT_ASSERT_TRUE(gtest_ct_internal::almost_equal<float>(X, Y))
 
-#define CT_ASSERT_DOUBLE_EQ(X, Y)               \
-  do {                                          \
-    CT_ASSERT_TRUE(gtest_ct_internal::almost_equal<double>(X, Y)); \
-  } while (0)
+#define CT_ASSERT_DOUBLE_EQ(X, Y) \
+  CT_ASSERT_TRUE(gtest_ct_internal::almost_equal<double>(X, Y))
 
-#define CT_ASSERT_NEAR(X, Y, abs_error)                \
-  do {                                                 \
-    CT_ASSERT_TRUE(std::abs((X) - (Y)) <= (abs_error)); \
-  } while (0)
+#define CT_ASSERT_NEAR(X, Y, abs_error) \
+  CT_ASSERT_TRUE(std::abs((X) - (Y)) <= (abs_error))
 
 #endif  // GTEST_CT_H_

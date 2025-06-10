@@ -9,6 +9,9 @@ class TestStruct {
   constexpr bool operator==(const TestStruct& rhs) const {
     return (this->a == rhs.a) && (this->b == rhs.b);
   }
+  constexpr bool operator!=(const TestStruct& rhs) const {
+    return !(*this == rhs);
+  }
   constexpr bool operator<(const TestStruct& rhs) const {
     return (this->a < rhs.a) || (this->a == rhs.a && this->b < rhs.b);
   }
@@ -37,18 +40,14 @@ TEST(CT_EXPECT_TESTS, BASICS) {
   CT_EXPECT_EQ(A, A);
   CT_EXPECT_EQ(A, B);
   CT_EXPECT_NE(A, C);
-}
 
-namespace  {
-  constexpr int dummy_function() {
-    return 42; // Dummy function to ensure the test compiles
-  }
+  CT_EXPECT_EQ(1, 1) << "This should not fail";
+  CT_EXPECT_NE(1, 2) << "This should not fail either";
 }
 
 TEST(CT_EXPECT_TESTS, RELATIONAL_OPERATORS) {
   constexpr int a = 5;
   constexpr int b = 10;
-  constexpr int c = dummy_function();
 
   CT_EXPECT_LT(a, b);
   CT_EXPECT_LE(a, b);
