@@ -1,9 +1,10 @@
 name: CTest Complex Matrix Build
 
 on:
-  push:
-    branches:
-      - '*'
+  # Manual trigger via GitHub UI
+  workflow_dispatch:
+
+  # Automatic on pull requests
   pull_request:
     branches:
       - '*'
@@ -21,7 +22,6 @@ jobs:
             cpp_standard: 11
             gtest_ref: release-1.12.1
           - compiler: clang++
-            compiler_version: 6
             cpp_standard: 11
             gtest_ref: release-1.12.1
 
@@ -31,7 +31,6 @@ jobs:
             cpp_standard: 14
             gtest_ref: v1.14.0
           - compiler: clang++
-            compiler_version: 7
             cpp_standard: 14
             gtest_ref: v1.14.0
 
@@ -41,7 +40,6 @@ jobs:
             cpp_standard: 17
             gtest_ref: main
           - compiler: clang++
-            compiler_version: 10
             cpp_standard: 17
             gtest_ref: main
 
@@ -51,7 +49,6 @@ jobs:
             cpp_standard: 20
             gtest_ref: main
           - compiler: clang++
-            compiler_version: 12
             cpp_standard: 20
             gtest_ref: main
 
@@ -61,7 +58,6 @@ jobs:
             cpp_standard: 23
             gtest_ref: main
           - compiler: clang++
-            compiler_version: 16
             cpp_standard: 23
             gtest_ref: main
 
@@ -69,19 +65,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Add PPAs for older compilers
+      - name: Add PPAs for older GCCs and Clang-20
         run: |
           sudo apt-get update
-
-          # Ubuntu Toolchain PPA for older GCCs (7, 8, 9, 10, 13)
+          # GCC versions 7,8,9,10,13
           sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-
-          # LLVM’s official repos for various Clang versions
-          wget -qO - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-          for ver in 6.0 7 10 12 16; do
-            sudo add-apt-repository -y "deb http://apt.llvm.org/noble/ llvm-toolchain-noble-${ver} main"
-          done
-
+          # LLVM apt key
+          wget -qO - https://apt.llvm.org/llvm-snapshot.gpg.key \
+            | sudo tee /etc/apt/trusted.gpg.d/llvm-snapshot.gpg > /dev/null
+          # Jammy (22.04) repo for clang-20
+          sudo add-apt-repository -y \
+            "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-20 main"
           sudo apt-get update
 
       - name: Install specific compiler version
@@ -90,8 +84,13 @@ jobs:
             sudo apt-get install -y g++-${{ matrix.compiler_version }}
             echo "CXX=g++-${{ matrix.compiler_version }}" >> $GITHUB_ENV
           else
-            sudo apt-get install -y clang-${{ matrix.compiler_version }}
-            echo "CXX=clang++-${{ matrix.compiler_version }}" >> $GITHUB_ENV
+            if [[ "${{ matrix.cpp_standard }}" == "23" ]]; then
+              sudo apt-get install -y clang-20
+              echo "CXX=clang++-20" >> $GITHUB_ENV
+            else
+              sudo apt-get install -y clang
+              echo "CXX=clang++" >> $GITHUB_ENV
+            fi
           fi
 
       - name: Install clang-tidy
@@ -99,13 +98,14 @@ jobs:
 
       - name: Clone GoogleTest (${{ matrix.gtest_ref }})
         run: |
-          git clone https://github.com/google/googletest.git -b ${{ matrix.gtest_ref }} googletest
+          git clone https://github.com/google/googletest.git \
+            -b ${{ matrix.gtest_ref }} googletest
 
       - name: Build and Install GoogleTest Locally
         run: |
-          # For GTest 1.12.1 we build with C++17; otherwise use the matrix standard
+          # GoogleTest 1.12.1 needs C++17 to build; others use matrix standard
           GT_BUILD_CXX_STANDARD="${{ matrix.cpp_standard }}"
-          if [ "${{ matrix.gtest_ref }}" = "release-1.12.1" ]; then
+          if [[ "${{ matrix.gtest_ref }}" == "release-1.12.1" ]]; then
             GT_BUILD_CXX_STANDARD="17"
           fi
 
@@ -118,7 +118,7 @@ jobs:
           cmake --install googletest/build
           echo "Installed GoogleTest under $HOME/gtest_install"
 
-      - name: Configure and Build Project (C++${{ matrix.cpp_standard }} with $CXX)
+      - name: Configure and Build Project
         run: |
           cmake -S . -B build \
             -DCMAKE_CXX_COMPILER="$CXX" \
@@ -129,33 +129,21 @@ jobs:
             -Dgtest_ct_build_tests=ON
 
           cmake --build build --verbose
-          echo "Finished building project with $CXX and C++${{ matrix.cpp_standard }}"
 
       - name: Run clang-tidy analysis
         run: |
-          echo "Analyzing library header and test files..."
-          FILES_TO_CHECK=(
-            "include/gtest_ct.h"
-            "test/passing_tests/passing_tests.cpp"
-          )
-
-          for file in "${FILES_TO_CHECK[@]}"; do
-            echo "Analyzing $file..."
-            clang-tidy "$file" \
-              -p build \
+          for file in \
+            include/gtest_ct.h \
+            test/passing_tests/passing_tests.cpp; do
+            clang-tidy "$file" -p build \
               -header-filter='^(?!.*\/googletest\/).*$' \
-              -- \
-              -std=c++${{ matrix.cpp_standard }} \
-              -I"$HOME/gtest_install/include" \
-              -I"include" || true
+              -- -std=c++${{ matrix.cpp_standard }} \
+                 -I"$HOME/gtest_install/include" \
+                 -I"include" || true
           done
 
       - name: Show CTest test list
-        run: |
-          cd build
-          ctest -N
+        run: cd build && ctest -N
 
       - name: Run All Tests via CTest
-        run: |
-          cd build
-          ctest --output-on-failure -V -E "compilefail" || exit 1
+        run: cd build && ctest --output-on-failure -V -E "compilefail"
