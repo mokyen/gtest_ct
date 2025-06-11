@@ -69,9 +69,23 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install specific compiler version
+      - name: Add PPAs for older compilers
         run: |
           sudo apt-get update
+
+          # Ubuntu Toolchain PPA for older GCCs (7, 8, 9, 10, 13)
+          sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+
+          # LLVM’s official repos for various Clang versions
+          wget -qO - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+          for ver in 6.0 7 10 12 16; do
+            sudo add-apt-repository -y "deb http://apt.llvm.org/noble/ llvm-toolchain-noble-${ver} main"
+          done
+
+          sudo apt-get update
+
+      - name: Install specific compiler version
+        run: |
           if [[ "${{ matrix.compiler }}" == "g++" ]]; then
             sudo apt-get install -y g++-${{ matrix.compiler_version }}
             echo "CXX=g++-${{ matrix.compiler_version }}" >> $GITHUB_ENV
@@ -89,8 +103,7 @@ jobs:
 
       - name: Build and Install GoogleTest Locally
         run: |
-          # CMake 3.16+ required for GoogleTest main, consider enforcing minimum elsewhere
-          # GTest 1.12.1 doesn't respect C++11 well, so build it with C++17
+          # For GTest 1.12.1 we build with C++17; otherwise use the matrix standard
           GT_BUILD_CXX_STANDARD="${{ matrix.cpp_standard }}"
           if [ "${{ matrix.gtest_ref }}" = "release-1.12.1" ]; then
             GT_BUILD_CXX_STANDARD="17"
@@ -105,7 +118,7 @@ jobs:
           cmake --install googletest/build
           echo "Installed GoogleTest under $HOME/gtest_install"
 
-      - name: Configure and Build Project (C++${{ matrix.cpp_standard }} with ${{ matrix.compiler }}-${{ matrix.compiler_version }})
+      - name: Configure and Build Project (C++${{ matrix.cpp_standard }} with $CXX)
         run: |
           cmake -S . -B build \
             -DCMAKE_CXX_COMPILER="$CXX" \
