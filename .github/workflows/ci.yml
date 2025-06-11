@@ -3,15 +3,10 @@ name: CTest Complex Matrix Build
 on:
   push:
     branches:
-      - '*'       # Trigger on pushes to any branch
-    # Optionally restrict to paths, for example:
-    # paths:
-    #   - 'src/**'
-    #   - 'include/**'
-    #   - 'test/**'
+      - '*'
   pull_request:
     branches:
-      - '*'       # Trigger on PRs targeting any branch
+      - '*'
 
 jobs:
   build:
@@ -19,100 +14,110 @@ jobs:
 
     strategy:
       matrix:
-        compiler: [g++, clang++]
-        cpp_standard: [11, 14, 17, 20, 23]
         include:
-          # C++11 -> GoogleTest release-1.12.1 (last C++11-compatible)
+          # C++11 with gtest 1.12.1
           - compiler: g++
+            compiler_version: 7
             cpp_standard: 11
             gtest_ref: release-1.12.1
           - compiler: clang++
+            compiler_version: 6
             cpp_standard: 11
             gtest_ref: release-1.12.1
-          # C++14 -> GoogleTest v1.14.0
+
+          # C++14 with gtest 1.14.0
           - compiler: g++
+            compiler_version: 8
             cpp_standard: 14
             gtest_ref: v1.14.0
           - compiler: clang++
+            compiler_version: 7
             cpp_standard: 14
             gtest_ref: v1.14.0
-          # C++17 -> GoogleTest v1.14.0
+
+          # C++17 with gtest main
           - compiler: g++
+            compiler_version: 9
             cpp_standard: 17
-            gtest_ref: v1.14.0
+            gtest_ref: main
           - compiler: clang++
+            compiler_version: 10
             cpp_standard: 17
-            gtest_ref: v1.14.0
-          # C++20 -> GoogleTest v1.14.0
+            gtest_ref: main
+
+          # C++20 with gtest main
           - compiler: g++
+            compiler_version: 10
             cpp_standard: 20
-            gtest_ref: v1.14.0
+            gtest_ref: main
           - compiler: clang++
+            compiler_version: 12
             cpp_standard: 20
-            gtest_ref: v1.14.0
-          # C++23 -> GoogleTest v1.14.0
+            gtest_ref: main
+
+          # C++23 with gtest main
           - compiler: g++
+            compiler_version: 13
             cpp_standard: 23
-            gtest_ref: v1.14.0
+            gtest_ref: main
           - compiler: clang++
+            compiler_version: 16
             cpp_standard: 23
-            gtest_ref: v1.14.0
+            gtest_ref: main
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install compiler (if needed)
+      - name: Install specific compiler version
         run: |
-          if [ "${{ matrix.compiler }}" = "clang++" ]; then
-            sudo apt-get update
-            sudo apt-get install -y clang
+          sudo apt-get update
+          if [[ "${{ matrix.compiler }}" == "g++" ]]; then
+            sudo apt-get install -y g++-${{ matrix.compiler_version }}
+            echo "CXX=g++-${{ matrix.compiler_version }}" >> $GITHUB_ENV
+          else
+            sudo apt-get install -y clang-${{ matrix.compiler_version }}
+            echo "CXX=clang++-${{ matrix.compiler_version }}" >> $GITHUB_ENV
           fi
 
       - name: Install clang-tidy
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y clang-tidy
+        run: sudo apt-get install -y clang-tidy
 
       - name: Clone GoogleTest (${{ matrix.gtest_ref }})
         run: |
           git clone https://github.com/google/googletest.git -b ${{ matrix.gtest_ref }} googletest
 
-      - name: Build and Install GoogleTest Locally (no sudo prefix on install)
+      - name: Build and Install GoogleTest Locally
         run: |
+          # CMake 3.16+ required for GoogleTest main, consider enforcing minimum elsewhere
+          # GTest 1.12.1 doesn't respect C++11 well, so build it with C++17
           GT_BUILD_CXX_STANDARD="${{ matrix.cpp_standard }}"
           if [ "${{ matrix.gtest_ref }}" = "release-1.12.1" ]; then
             GT_BUILD_CXX_STANDARD="17"
           fi
 
-          cmake -S googletest \
-                -B googletest/build \
-                -DCMAKE_CXX_COMPILER="${{ matrix.compiler }}" \
-                -DCMAKE_CXX_STANDARD="$GT_BUILD_CXX_STANDARD" \
-                -DCMAKE_INSTALL_PREFIX="$HOME/gtest_install"
+          cmake -S googletest -B googletest/build \
+            -DCMAKE_CXX_COMPILER="$CXX" \
+            -DCMAKE_CXX_STANDARD="$GT_BUILD_CXX_STANDARD" \
+            -DCMAKE_INSTALL_PREFIX="$HOME/gtest_install"
 
           cmake --build googletest/build
-          cmake --install googletest/build --prefix "$HOME/gtest_install"
+          cmake --install googletest/build
           echo "Installed GoogleTest under $HOME/gtest_install"
 
-      - name: Configure and Build Project (with C++ ${{ matrix.cpp_standard }} on ${{ matrix.compiler }})
+      - name: Configure and Build Project (C++${{ matrix.cpp_standard }} with ${{ matrix.compiler }}-${{ matrix.compiler_version }})
         run: |
           cmake -S . -B build \
-                -DCMAKE_CXX_COMPILER="${{ matrix.compiler }}" \
-                -DCMAKE_CXX_STANDARD=${{ matrix.cpp_standard }} \
-                -DCMAKE_PREFIX_PATH="$HOME/gtest_install" \
-                -DCMAKE_RUNTIME_OUTPUT_DIRECTORY=bin \
-                -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
-                -Dgtest_ct_build_tests=ON
-          cmake --build build --verbose
-          echo "Finished building project with ${{ matrix.compiler }} and C++${{ matrix.cpp_standard }}"
+            -DCMAKE_CXX_COMPILER="$CXX" \
+            -DCMAKE_CXX_STANDARD=${{ matrix.cpp_standard }} \
+            -DCMAKE_PREFIX_PATH="$HOME/gtest_install" \
+            -DCMAKE_RUNTIME_OUTPUT_DIRECTORY=bin \
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+            -Dgtest_ct_build_tests=ON
 
-      # - name: Run clang-tidy analysis on passing tests file
-      #   run: |
-      #     echo "Analyzing representative file: test/passing_tests/passing_tests.cpp"
-      #     # Use -header-filter to skip third-party code (e.g. googletest or gtest) completely.
-      #     clang-tidy test/passing_tests/passing_tests.cpp -p build -header-filter='^(?!.*\/googletest\/).*$' || true
-      
+          cmake --build build --verbose
+          echo "Finished building project with $CXX and C++${{ matrix.cpp_standard }}"
+
       - name: Run clang-tidy analysis
         run: |
           echo "Analyzing library header and test files..."
@@ -120,7 +125,7 @@ jobs:
             "include/gtest_ct.h"
             "test/passing_tests/passing_tests.cpp"
           )
-          
+
           for file in "${FILES_TO_CHECK[@]}"; do
             echo "Analyzing $file..."
             clang-tidy "$file" \
