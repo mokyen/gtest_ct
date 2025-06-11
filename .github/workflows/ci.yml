@@ -8,53 +8,66 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    # Pick runner based on the matrix.os field
+    runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
         include:
-          # C++11 with gtest 1.12.1
-          - compiler: g++
+          # GCC jobs run on Ubuntu 20.04
+          - os: ubuntu-20.04
+            compiler: g++
             compiler_version: 7
             cpp_standard: 11
             gtest_ref: release-1.12.1
-          - compiler: clang++
-            cpp_standard: 11
-            gtest_ref: release-1.12.1
 
-          # C++14 with gtest 1.14.0
-          - compiler: g++
+          - os: ubuntu-20.04
+            compiler: g++
             compiler_version: 8
             cpp_standard: 14
             gtest_ref: v1.14.0
-          - compiler: clang++
-            cpp_standard: 14
-            gtest_ref: v1.14.0
 
-          # C++17 with gtest main
-          - compiler: g++
+          - os: ubuntu-20.04
+            compiler: g++
             compiler_version: 9
             cpp_standard: 17
             gtest_ref: main
-          - compiler: clang++
-            cpp_standard: 17
-            gtest_ref: main
 
-          # C++20 with gtest main
-          - compiler: g++
+          - os: ubuntu-20.04
+            compiler: g++
             compiler_version: 10
             cpp_standard: 20
             gtest_ref: main
-          - compiler: clang++
-            cpp_standard: 20
-            gtest_ref: main
 
-          # C++23 with gtest main
-          - compiler: g++
+          - os: ubuntu-20.04
+            compiler: g++
             compiler_version: 13
             cpp_standard: 23
             gtest_ref: main
-          - compiler: clang++
+
+          # Clang jobs run on Ubuntu latest
+          - os: ubuntu-latest
+            compiler: clang++
+            cpp_standard: 11
+            gtest_ref: release-1.12.1
+
+          - os: ubuntu-latest
+            compiler: clang++
+            cpp_standard: 14
+            gtest_ref: v1.14.0
+
+          - os: ubuntu-latest
+            compiler: clang++
+            cpp_standard: 17
+            gtest_ref: main
+
+          - os: ubuntu-latest
+            compiler: clang++
+            cpp_standard: 20
+            gtest_ref: main
+
+          - os: ubuntu-latest
+            compiler: clang++
             cpp_standard: 23
             gtest_ref: main
 
@@ -62,33 +75,36 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Add PPAs for GCC and Clang-20
+      # Only GCC jobs need the toolchain PPA
+      - name: Add PPA for older GCCs
+        if: matrix.compiler == 'g++'
         run: |
           sudo apt-get update
-
-          # Ubuntu Toolchain PPA for g++-7/8/9/10/13
           sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-
-          # Fetch and dearmor the LLVM GPG key
-          curl -sSL https://apt.llvm.org/llvm-snapshot.gpg.key \
-            | sudo gpg --dearmor -o /usr/share/keyrings/llvm-snapshot.gpg
-
-          # Add the Jammy LLVM-20 repo, signed by our key
-          echo "deb [signed-by=/usr/share/keyrings/llvm-snapshot.gpg] http://apt.llvm.org/jammy/ llvm-toolchain-jammy-20 main" \
-            | sudo tee /etc/apt/sources.list.d/llvm-toolchain-jammy-20.list
-
           sudo apt-get update
 
       - name: Install specific compiler version
         run: |
           if [[ "${{ matrix.compiler }}" == "g++" ]]; then
+            # All GCC jobs (on Ubuntu 20.04)
             sudo apt-get install -y g++-${{ matrix.compiler_version }}
             echo "CXX=g++-${{ matrix.compiler_version }}" >> $GITHUB_ENV
+
           else
+            # Clang jobs (on ubuntu-latest)
             if [[ "${{ matrix.cpp_standard }}" == "23" ]]; then
+              # C++23 → install Clang-20 via Jammy repo
+              curl -sSL https://apt.llvm.org/llvm-snapshot.gpg.key \
+                | sudo gpg --dearmor -o /usr/share/keyrings/llvm-snapshot.gpg
+              echo "deb [signed-by=/usr/share/keyrings/llvm-snapshot.gpg] http://apt.llvm.org/jammy/ llvm-toolchain-jammy-20 main" \
+                | sudo tee /etc/apt/sources.list.d/llvm-jammy-20.list
+              sudo apt-get update
               sudo apt-get install -y clang-20
               echo "CXX=clang++-20" >> $GITHUB_ENV
+
             else
+              # All other Clang jobs use distro clang (v16)
+              sudo apt-get update
               sudo apt-get install -y clang
               echo "CXX=clang++" >> $GITHUB_ENV
             fi
@@ -104,6 +120,7 @@ jobs:
 
       - name: Build and Install GoogleTest Locally
         run: |
+          # GTest 1.12.1 needs C++17 to build; others follow the matrix standard
           GT_BUILD_CXX_STANDARD="${{ matrix.cpp_standard }}"
           if [[ "${{ matrix.gtest_ref }}" == "release-1.12.1" ]]; then
             GT_BUILD_CXX_STANDARD="17"
@@ -132,9 +149,7 @@ jobs:
 
       - name: Run clang-tidy analysis
         run: |
-          for file in \
-            include/gtest_ct.h \
-            test/passing_tests/passing_tests.cpp; do
+          for file in include/gtest_ct.h test/passing_tests/passing_tests.cpp; do
             clang-tidy "$file" -p build \
               -header-filter='^(?!.*\/googletest\/).*$' \
               -- -std=c++${{ matrix.cpp_standard }} \
