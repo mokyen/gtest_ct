@@ -3,6 +3,9 @@ cmake_minimum_required(VERSION 3.13)
 # Define the project name and version
 project(gtest_ct VERSION 1.0.0)
 
+# Find GTest before adding subdirectories that use it
+find_package(GTest REQUIRED)
+
 # Include utilities
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(utilities)

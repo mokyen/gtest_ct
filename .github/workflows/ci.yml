@@ -38,31 +38,31 @@ jobs:
           - compiler: g++
             version: 12
             cpp_standard: 17
-            gtest_ref: v1.14.0
+            gtest_ref: main
           - compiler: clang++
             version: 15
             cpp_standard: 17
-            gtest_ref: v1.14.0
+            gtest_ref: main
 
           # C++20
           - compiler: g++
             version: 12
             cpp_standard: 20
-            gtest_ref: v1.14.0
+            gtest_ref: main
           - compiler: clang++
             version: 15
             cpp_standard: 20
-            gtest_ref: v1.14.0
+            gtest_ref: main
 
           # C++23
           - compiler: g++
             version: 12
             cpp_standard: 23
-            gtest_ref: v1.14.0
+            gtest_ref: main
           - compiler: clang++
             version: 15
             cpp_standard: 23
-            gtest_ref: v1.14.0
+            gtest_ref: main
 
     steps:
       - name: Checkout repository
