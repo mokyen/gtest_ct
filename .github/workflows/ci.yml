@@ -1,0 +1,159 @@
+name: CTest Complex Matrix Build
+
+on:
+  # Manual trigger via GitHub UI
+  workflow_dispatch:
+  # Automatic on pull requests
+  pull_request:
+    branches:
+      - '*'
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    strategy:
+      matrix:
+        include:
+          # C++11
+          - compiler: g++
+            version: 9
+            cpp_standard: 11
+            gtest_ref: release-1.12.1
+          - compiler: clang++
+            version: 13
+            cpp_standard: 11
+            gtest_ref: release-1.12.1
+
+          # C++14
+          - compiler: g++
+            version: 10
+            cpp_standard: 14
+            gtest_ref: v1.14.0
+          - compiler: clang++
+            version: 14
+            cpp_standard: 14
+            gtest_ref: v1.14.0
+
+          # C++17
+          - compiler: g++
+            version: 12
+            cpp_standard: 17
+            gtest_ref: main
+          - compiler: clang++
+            version: 15
+            cpp_standard: 17
+            gtest_ref: main
+
+          # C++20
+          - compiler: g++
+            version: 12
+            cpp_standard: 20
+            gtest_ref: main
+          - compiler: clang++
+            version: 15
+            cpp_standard: 20
+            gtest_ref: main
+
+          # C++23
+          - compiler: g++
+            version: 12
+            cpp_standard: 23
+            gtest_ref: main
+          - compiler: clang++
+            version: 15
+            cpp_standard: 23
+            gtest_ref: main
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Show available GCC and Clang versions
+        run: |
+          echo "Available GCC versions:"
+          apt-cache search '^g++-[0-9]+$' | sort
+          echo
+          echo "Available Clang versions:"
+          apt-cache search '^clang-[0-9]+$' | sort
+          echo
+          echo "Available installed compilers:"
+          ls /usr/bin/g++* /usr/bin/clang* 2>/dev/null || true
+
+      - name: Install compiler
+        run: |
+          if [ "${{ matrix.compiler }}" = "g++" ]; then
+            sudo apt-get update
+            sudo apt-get install -y g++-${{ matrix.version }}
+            echo "CXX=g++-${{ matrix.version }}" >> $GITHUB_ENV
+          else
+            sudo apt-get update
+            sudo apt-get install -y clang-${{ matrix.version }}
+            echo "CXX=clang++-${{ matrix.version }}" >> $GITHUB_ENV
+          fi
+
+      - name: Install clang-tidy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-tidy
+
+      - name: Clone GoogleTest (${{ matrix.gtest_ref }})
+        run: |
+          git clone https://github.com/google/googletest.git -b ${{ matrix.gtest_ref }} googletest
+
+      - name: Build and Install GoogleTest Locally
+        run: |
+          GT_BUILD_CXX_STANDARD="${{ matrix.cpp_standard }}"
+          if [ "${{ matrix.gtest_ref }}" = "release-1.12.1" ]; then
+            GT_BUILD_CXX_STANDARD="17"
+          fi
+
+          cmake -S googletest \
+                -B googletest/build \
+                -DCMAKE_CXX_COMPILER="${CXX}" \
+                -DCMAKE_CXX_STANDARD="$GT_BUILD_CXX_STANDARD" \
+                -DCMAKE_INSTALL_PREFIX="$HOME/gtest_install"
+
+          cmake --build googletest/build
+          cmake --install googletest/build --prefix "$HOME/gtest_install"
+          echo "Installed GoogleTest under $HOME/gtest_install"
+
+      - name: Configure and Build Project (with C++ ${{ matrix.cpp_standard }} on ${{ matrix.compiler }}-${{ matrix.version }})
+        run: |
+          cmake -S . -B build \
+                -DCMAKE_CXX_COMPILER="${CXX}" \
+                -DCMAKE_CXX_STANDARD=${{ matrix.cpp_standard }} \
+                -DCMAKE_PREFIX_PATH="$HOME/gtest_install" \
+                -DCMAKE_RUNTIME_OUTPUT_DIRECTORY=bin \
+                -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+                -Dgtest_ct_build_tests=ON \
+                -Dcompile_fail_force_std=${{ matrix.cpp_standard }}
+          cmake --build build --verbose
+          echo "Finished building project with ${{ matrix.compiler }}-${{ matrix.version }} and C++${{ matrix.cpp_standard }}"
+
+      - name: Run clang-tidy analysis
+        run: |
+          echo "Analyzing library header and test files..."
+          FILES_TO_CHECK=(
+            "include/gtest_ct.h"
+            "test/passing_tests/passing_tests.cpp"
+          )
+          for file in "${FILES_TO_CHECK[@]}"; do
+            echo "Analyzing $file..."
+            clang-tidy "$file" \
+              -p build \
+              -header-filter='^(?!.*\/googletest\/).*$' \
+              -- \
+              -std=c++${{ matrix.cpp_standard }} \
+              -I"$HOME/gtest_install/include" \
+              -I"include" || true
+          done
+
+      - name: Show CTest test list
+        run: |
+          cd build
+          ctest -N
+
+      - name: Run All Tests via CTest
+        run: |
+          cd build
+          ctest --output-on-failure -V -E "compilefail" || exit 1
