@@ -29,9 +29,11 @@ TEST(MathTest, CompileTimeValidation) {
 Requirements are specified using [EARS (Easy Approach to Requirements Syntax)](https://alistairmavin.com/ears/) for clarity and testability.
 
 ### Language & Compiler Support
-**R1**: WHEN compiling with GCC, the system SHALL support C++11, 14, 17, 20, and 23 standards.
+**R1**: WHEN compiling with GCC 10 or greater, the system SHALL support C++11, 14, 17, 20, and 23 standards.
 
-**R2**: WHEN compiling with Clang, the system SHALL support C++11, 14, 17, 20, and 23 standards.
+**R2**: WHEN compiling with Clang 20 or greater, the system SHALL support C++11, 14, 17, 20, and 23 standards.
+
+**Note on Compiler Versions**: The specified compiler versions represent the minimum versions explicitly tested in continuous integration. The library uses standard C++ features and is expected to work with older compiler versions that support the required C++ standards, though compatibility with earlier versions is not explicitly validated.
 
 ### Compile-Time Features
 **R3**: WHEN a compile-time test fails, the system SHALL provide the ability to fail compilation immediately via global configuration.
@@ -74,7 +76,7 @@ Requirements are specified using [EARS (Easy Approach to Requirements Syntax)](h
 
 ## Key Features
 
-- **Broad Compiler Support**: Works with GCC and Clang across C++11 through C++23
+- **Broad Compiler Support**: Works with GCC 10+ and Clang 20+ across C++11 through C++23
 - **CMake Integration**: Full CMake support for easy project integration
 - **Flexible Failure Modes**: Choose between immediate compilation failure, runtime reporting, or global runtime-only mode
 - **Global Override Control**: Force all tests to runtime-only reporting regardless of other settings

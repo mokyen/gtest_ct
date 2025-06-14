@@ -20,7 +20,7 @@ Complete traceability matrix covering all requirements R1-R14:
 
 | Req ID | Description | Test Location | Test Description |
 |--------|-------------|---------------|------------------|
-| R1-R2  | C++/Compiler Support | CI Pipeline | Matrix build testing all compiler/standard combinations |
+| R1-R2  | C++/Compiler Support | CI Pipeline | Matrix build testing GCC 10+ and Clang 20+ across C++ standards |
 | R3     | CT Error Fails Build | compilation_fail_tests/ | All CT_ASSERT tests verify build failure |
 | R4     | Global Runtime Override | CI Pipeline | CONTINUE_ON_CT_FAIL flag testing |
 | R5     | RT Reporting | passing_tests/passing_tests.cpp | CT_EXPECT_FAILURE_TESTS verify RT reporting |

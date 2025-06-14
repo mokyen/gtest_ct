@@ -42,3 +42,7 @@ Checks: >
   -google-readability-avoid-underscore-in-googletest-name,
   -bugprone-easily-swappable-parameters,
   -misc-non-private-member-variables-in-classes
+
+
+
+  Disable self-tests by default in CMakeLists.txt and clean up gtest_ct.h macros for consistency.
