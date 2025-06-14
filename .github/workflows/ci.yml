@@ -1,11 +1,12 @@
 name: CTest Complex Matrix Build
 
 on:
-  push:
-    branches: [ main ]
+  # Manual trigger via GitHub UI
+  workflow_dispatch:
+  # Automatic on pull requests
   pull_request:
-    branches: [ main ]
-
+    branches:
+      - '*'
 jobs:
   build:
     runs-on: ubuntu-latest
