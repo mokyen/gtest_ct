@@ -20,7 +20,7 @@ jobs:
             cpp_standard: 11
             gtest_ref: release-1.12.1
           - compiler: clang++
-            version: 12
+            version: 13
             cpp_standard: 11
             gtest_ref: release-1.12.1
 
@@ -30,33 +30,37 @@ jobs:
             cpp_standard: 14
             gtest_ref: v1.14.0
           - compiler: clang++
-            version: 13
+            version: 14
             cpp_standard: 14
             gtest_ref: v1.14.0
 
-          # C++17, 20, 23
+          # C++17
           - compiler: g++
-            version: 13
+            version: 12
             cpp_standard: 17
             gtest_ref: v1.14.0
+          - compiler: clang++
+            version: 15
+            cpp_standard: 17
+            gtest_ref: v1.14.0
+
+          # C++20
           - compiler: g++
-            version: 13
+            version: 12
             cpp_standard: 20
             gtest_ref: v1.14.0
+          - compiler: clang++
+            version: 15
+            cpp_standard: 20
+            gtest_ref: v1.14.0
+
+          # C++23
           - compiler: g++
-            version: 13
+            version: 12
             cpp_standard: 23
             gtest_ref: v1.14.0
           - compiler: clang++
-            version: 17
-            cpp_standard: 17
-            gtest_ref: v1.14.0
-          - compiler: clang++
-            version: 17
-            cpp_standard: 20
-            gtest_ref: v1.14.0
-          - compiler: clang++
-            version: 17
+            version: 15
             cpp_standard: 23
             gtest_ref: v1.14.0
 
