@@ -57,7 +57,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake .. -DCMAKE_CXX_COMPILER=${CXX} -DCMAKE_CXX_STANDARD=${{ matrix.std }}
+          cmake .. -DCMAKE_CXX_COMPILER=${CXX} -DCMAKE_CXX_STANDARD=${{ matrix.std }} -Dcompile_fail_force_std=${{ matrix.std }}
 
       - name: Build
         run: |

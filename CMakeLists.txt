@@ -10,9 +10,8 @@ include(utilities)
 # Option to build tests, default is OFF
 option(gtest_ct_build_tests "Build gtest_ct's self-tests." OFF)
 
-# Make sure to include the directory with your headers
-add_library(gtest_ct INTERFACE)
-target_include_directories(gtest_ct INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+# Add the header-only library from the include directory
+add_subdirectory(include)
 
 # Add subdirectory for the tests if enabled
 if (gtest_ct_build_tests)

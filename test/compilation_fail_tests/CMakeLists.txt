@@ -1,14 +1,3 @@
-cmake_minimum_required(VERSION 3.16)
-project(CompileFailTests NONE)
-
-# Set default C++ standard if not already set externally
-if(NOT DEFINED CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 17)
-endif()
-
-# Allow manual override with cmake -Dcompile_fail_force_std=20
-set(compile_fail_force_std "${CMAKE_CXX_STANDARD}" CACHE STRING "C++ standard to test compilation failures with")
-
 # One test per CT_ASSERT macro
 add_compile_fail_test(ct_assert_true_fail ct_assert_true_fail.cpp)
 add_compile_fail_test(ct_assert_false_fail ct_assert_false_fail.cpp)

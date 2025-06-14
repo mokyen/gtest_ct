@@ -1,8 +1,3 @@
-project(TUSpecificTests)
-
-# Use the same C++ standard as other tests
-set(compile_fail_force_std "${CMAKE_CXX_STANDARD}" CACHE STRING "C++ standard to test compilation failures with")
-
 # Find GTest package
 find_package(GTest REQUIRED)
 
