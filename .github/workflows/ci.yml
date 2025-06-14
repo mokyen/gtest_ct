@@ -64,6 +64,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Show available GCC and Clang versions
+        run: |
+          echo "Available GCC versions:"
+          apt-cache search '^g++-[0-9]+$' | sort
+          echo
+          echo "Available Clang versions:"
+          apt-cache search '^clang-[0-9]+$' | sort
+          echo
+          echo "Available installed compilers:"
+          ls /usr/bin/g++* /usr/bin/clang* 2>/dev/null || true
+
       - name: Install compiler
         run: |
           if [ "${{ matrix.compiler }}" = "g++" ]; then
